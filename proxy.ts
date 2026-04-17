@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const PUBLIC_API_PREFIXES = ["/api/auth", "/api/health", "/api/users"];
+const PUBLIC_API_PREFIXES = ["/api/auth", "/api/health", "/api/users", "/api/docs"];
 const PUBLIC_PAGES = ["/", "/login", "/register"];
 
 export async function proxy(req: NextRequest) {
@@ -28,6 +28,10 @@ export async function proxy(req: NextRequest) {
         const loginUrl = req.nextUrl.clone();
         loginUrl.pathname = "/login";
         return NextResponse.redirect(loginUrl);
+    }
+
+    if (pathname.startsWith("/api/admin/") && token.role !== "SUPER_ADMIN") {
+        return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 
     return NextResponse.next();

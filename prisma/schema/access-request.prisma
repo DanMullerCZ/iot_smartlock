@@ -1,0 +1,25 @@
+model AccessRequest {
+  // Identifiers
+  id BigInt @id @default(autoincrement())
+
+  // Relations
+  userId Int
+  user   User       @relation(fields: [userId], references: [id])
+
+  cardId Int
+  card   AccessCard @relation(fields: [cardId], references: [id])
+
+  roomId Int
+  room   Room       @relation(fields: [roomId], references: [id])
+
+  // Relations (only back-reference = no DB columns)
+  accessResult AccessResult?
+
+  // Date columns
+  requestedAt DateTime
+
+  @@index([userId])
+  @@index([cardId])
+  @@index([roomId])
+  @@index([requestedAt])
+}

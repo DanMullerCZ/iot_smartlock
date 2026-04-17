@@ -1,0 +1,33 @@
+model AccessPermission {
+  // Identifiers
+  id Int @id @default(autoincrement())
+
+  // Relations
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+  roomId Int
+  room   Room @relation(fields: [roomId], references: [id])
+
+  // Data
+  status PermissionStatus @default(ACTIVE)
+
+  // Date columns
+  from      DateTime?
+  to        DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([userId])
+  @@index([roomId])
+  @@index([userId, roomId])
+  @@index([deletedAt])
+  @@index([createdAt])
+  @@index([status])
+}
+
+enum PermissionStatus {
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+}

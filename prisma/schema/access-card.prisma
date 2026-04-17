@@ -1,0 +1,37 @@
+model AccessCard {
+  // Identifiers
+  id        Int    @id @default(autoincrement())
+  uuid      String @unique @default(uuid()) @db.Uuid
+
+  // Relations
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id])
+
+  // Relations (only back-reference = no DB columns)
+  accessRequests AccessRequest[]
+
+  // Data
+  code   String     @unique @db.VarChar(128)
+  type   CardType   @default(RFID)
+  status CardStatus @default(DISABLED)
+
+  // Date columns
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  assignedAt DateTime?
+  deletedAt  DateTime?
+
+  @@index([userId])
+  @@index([deletedAt])
+  @@index([createdAt])
+  @@index([status])
+}
+
+enum CardType {
+  RFID
+}
+
+enum CardStatus {
+  ACTIVE
+  DISABLED
+}

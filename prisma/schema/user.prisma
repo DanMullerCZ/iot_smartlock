@@ -14,6 +14,11 @@ model User {
   // Extras
   status    Status   @default(NOT_VERIFIED)
 
+  // Relations (only back-references = no DB columns)
+  accessCards       AccessCard[]
+  accessPermissions AccessPermission[]
+  accessRequests    AccessRequest[]
+
   // Date columns
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

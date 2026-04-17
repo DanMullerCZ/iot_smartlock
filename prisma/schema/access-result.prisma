@@ -1,0 +1,22 @@
+model AccessResult {
+  // Identifiers
+  id    BigInt     @id @default(autoincrement())
+
+  // Relations
+  accessRequestId BigInt        @unique // UQ enforces 1:1
+  accessRequest   AccessRequest @relation(fields: [accessRequestId], references: [id])
+
+  // Data
+  result      Result
+  completedAt DateTime
+
+  @@index([completedAt])
+  @@index([result, completedAt])
+}
+
+enum Result {
+  OK
+  GENERIC_ERROR
+  DENIED
+  TIMEOUT
+}
