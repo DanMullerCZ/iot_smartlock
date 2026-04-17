@@ -1,4 +1,4 @@
-import { type z as Zod } from "zod";
+import type { z as Zod } from "zod";
 
 export function buildParameters(z: typeof Zod) {
     const paginationQuery = z.object({

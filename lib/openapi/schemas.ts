@@ -1,48 +1,88 @@
-import { type OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
-import { type z as Zod } from "zod";
+import type { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
+import type { z as Zod } from "zod";
 
-import { accessCardCreateSchema, accessCardUpdateSchema } from "@/lib/validations/access-card";
-import {
-    accessPermissionCreateSchema,
-    accessPermissionUpdateSchema,
-} from "@/lib/validations/access-permission";
-import { roomCreateSchema, roomUpdateSchema } from "@/lib/validations/room";
-import {
-    adminUserCreateSchema,
-    adminUserUpdateSchema,
-    registerSchema,
-} from "@/lib/validations/user";
-
+// All schemas are created inside this factory so they use the z instance that
+// has already been patched by extendZodWithOpenApi(z) in spec.ts. Importing
+// pre-existing Zod schemas from lib/validations/* and passing them to
+// registry.register() would fail in production because registry.register()
+// calls .openapi() on the schema immediately, and Zod 4 does not retroactively
+// add that method to instances created before extendZodWithOpenApi ran.
 export function buildSchemas(z: typeof Zod, registry: OpenAPIRegistry) {
     const DateTimeNullable = z.iso.datetime().nullable();
 
-    // ─── Request schemas (no .openapi() on imported schemas — different z instance) ──
-    const RegisterRequestSchema = registry.register("RegisterRequest", registerSchema);
+    // ─── Request schemas ──────────────────────────────────────────────────────
     const AdminUserCreateRequestSchema = registry.register(
         "AdminUserCreateRequest",
-        adminUserCreateSchema,
+        z.object({
+            name: z.string().min(1).max(100),
+            email: z.email(),
+            password: z.string().min(8).max(64),
+            role: z.enum(["SUPER_ADMIN", "ADMIN", "USER"]).default("USER"),
+            status: z.enum(["NOT_VERIFIED", "ACTIVE", "DISABLED"]).default("NOT_VERIFIED"),
+        }),
     );
     const AdminUserUpdateRequestSchema = registry.register(
         "AdminUserUpdateRequest",
-        adminUserUpdateSchema,
+        z.object({
+            name: z.string().min(1).max(100).optional(),
+            email: z.email().optional(),
+            role: z.enum(["SUPER_ADMIN", "ADMIN", "USER"]).optional(),
+            status: z.enum(["NOT_VERIFIED", "ACTIVE", "DISABLED"]).optional(),
+        }),
     );
-    const RoomCreateRequestSchema = registry.register("RoomCreateRequest", roomCreateSchema);
-    const RoomUpdateRequestSchema = registry.register("RoomUpdateRequest", roomUpdateSchema);
+    const RoomCreateRequestSchema = registry.register(
+        "RoomCreateRequest",
+        z.object({
+            name: z.string().min(1).max(100),
+            location: z.string().max(255).optional(),
+            description: z.string().optional(),
+            status: z.enum(["ACTIVE", "BLOCKED", "DISABLED"]).default("DISABLED"),
+        }),
+    );
+    const RoomUpdateRequestSchema = registry.register(
+        "RoomUpdateRequest",
+        z.object({
+            name: z.string().min(1).max(100).optional(),
+            location: z.string().max(255).nullable().optional(),
+            description: z.string().nullable().optional(),
+            status: z.enum(["ACTIVE", "BLOCKED", "DISABLED"]).optional(),
+        }),
+    );
     const AccessCardCreateRequestSchema = registry.register(
         "AccessCardCreateRequest",
-        accessCardCreateSchema,
+        z.object({
+            code: z.string().min(1).max(128),
+            type: z.enum(["RFID"]).default("RFID"),
+            status: z.enum(["ACTIVE", "DISABLED"]).default("DISABLED"),
+            userId: z.number().int().positive().optional(),
+        }),
     );
     const AccessCardUpdateRequestSchema = registry.register(
         "AccessCardUpdateRequest",
-        accessCardUpdateSchema,
+        z.object({
+            code: z.string().min(1).max(128).optional(),
+            type: z.enum(["RFID"]).optional(),
+            status: z.enum(["ACTIVE", "DISABLED"]).optional(),
+            userId: z.number().int().positive().nullable().optional(),
+        }),
     );
     const AccessPermissionCreateRequestSchema = registry.register(
         "AccessPermissionCreateRequest",
-        accessPermissionCreateSchema,
+        z.object({
+            userId: z.number().int().positive(),
+            roomId: z.number().int().positive(),
+            status: z.enum(["ACTIVE", "SUSPENDED", "EXPIRED"]).default("ACTIVE"),
+            from: z.iso.datetime().optional(),
+            to: z.iso.datetime().optional(),
+        }),
     );
     const AccessPermissionUpdateRequestSchema = registry.register(
         "AccessPermissionUpdateRequest",
-        accessPermissionUpdateSchema,
+        z.object({
+            status: z.enum(["ACTIVE", "SUSPENDED", "EXPIRED"]).optional(),
+            from: z.iso.datetime().nullable().optional(),
+            to: z.iso.datetime().nullable().optional(),
+        }),
     );
 
     // ─── Shared sub-schemas ──────────────────────────────────────────────────────
@@ -250,7 +290,6 @@ export function buildSchemas(z: typeof Zod, registry: OpenAPIRegistry) {
     );
 
     return {
-        RegisterRequestSchema,
         AdminUserCreateRequestSchema,
         AdminUserUpdateRequestSchema,
         RoomCreateRequestSchema,
