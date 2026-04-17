@@ -15,6 +15,7 @@ Web application for managing IoT smart lock devices. Built with Next.js 16, Pris
 | Validation       | Zod 4                                     |
 | Styling          | Tailwind CSS 4                            |
 | DB adapter       | `@prisma/adapter-pg` (connection pooling) |
+| API docs         | OpenAPI 3.0 via `@asteasolutions/zod-to-openapi` + Swagger UI |
 
 ---
 
@@ -23,7 +24,6 @@ Web application for managing IoT smart lock devices. Built with Next.js 16, Pris
 - Node.js 20+
 - npm 10+
 - Docker + Docker Compose (local development)
-- A Supabase project (production) — or keep Docker for production too
 
 ---
 
@@ -70,6 +70,10 @@ NEXTAUTH_URL=http://localhost:3000
 # Local Docker Postgres (both point to the same instance in dev)
 DATABASE_URL="postgresql://admin:admin@localhost:5431/smartlock_local"
 DATABASE_DIRECT_URL="postgresql://admin:admin@localhost:5431/smartlock_local"
+
+# Optional — enables Google OAuth sign-in
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
 ```
 
 `DATABASE_URL` is used by the Prisma client at runtime.  
@@ -116,14 +120,19 @@ Prisma uses a **multi-file schema** under `prisma/schema/`:
 ```
 prisma/
   schema/
-    base.prisma     ← generator + datasource
-    user.prisma     ← User model, Role enum, Status enum
-  migrations/       ← migration history
+    base.prisma               ← generator + datasource
+    user.prisma               ← User, Role enum, Status enum
+    room.prisma               ← Room
+    access-card.prisma        ← AccessCard
+    access-permission.prisma  ← AccessPermission
+    access-request.prisma     ← AccessRequest (BigInt PK)
+    access-result.prisma      ← AccessResult (BigInt PK)
+  migrations/
 ```
 
 Adding a new model: create `prisma/schema/<model>.prisma` and run `npm run db:migrate`.
 
-### User model summary
+### User
 
 | Column      | Type            | Notes                                                |
 | ----------- | --------------- | ---------------------------------------------------- |
@@ -137,7 +146,46 @@ Adding a new model: create `prisma/schema/<model>.prisma` and run `npm run db:mi
 | `createdAt` | `DateTime`      | Indexed for pagination                               |
 | `deletedAt` | `DateTime?`     | Soft delete; indexed + composite index with `status` |
 
-`updatedAt` is managed automatically by Prisma on every update.
+### Room
+
+| Column        | Type           | Notes                                    |
+| ------------- | -------------- | ---------------------------------------- |
+| `id`          | `Int` PK       |                                          |
+| `uuid`        | `UUID`         | Public identifier                        |
+| `name`        | `VARCHAR(100)` |                                          |
+| `location`    | `TEXT?`        |                                          |
+| `description` | `TEXT?`        |                                          |
+| `status`      | `RoomStatus`   | `ACTIVE` / `BLOCKED` / `DISABLED`        |
+| `deletedAt`   | `DateTime?`    | Soft delete                              |
+
+### AccessCard
+
+| Column       | Type           | Notes                                            |
+| ------------ | -------------- | ------------------------------------------------ |
+| `id`         | `Int` PK       |                                                  |
+| `uuid`       | `UUID`         |                                                  |
+| `code`       | `VARCHAR(128)` | Unique RFID/NFC code                             |
+| `type`       | `CardType`     | `RFID`                                           |
+| `status`     | `CardStatus`   | `ACTIVE` / `DISABLED`                            |
+| `userId`     | `Int?` FK      | Owning user; `null` = unassigned                 |
+| `assignedAt` | `DateTime?`    | When the card was last assigned                  |
+| `deletedAt`  | `DateTime?`    | Soft delete                                      |
+
+### AccessPermission
+
+| Column     | Type                    | Notes                                              |
+| ---------- | ----------------------- | -------------------------------------------------- |
+| `id`       | `Int` PK                |                                                    |
+| `userId`   | `Int` FK                |                                                    |
+| `roomId`   | `Int` FK                |                                                    |
+| `status`   | `PermissionStatus`      | `ACTIVE` / `SUSPENDED` / `EXPIRED`                 |
+| `from`     | `DateTime?`             | Permission valid from                              |
+| `to`       | `DateTime?`             | Permission valid until                             |
+| `deletedAt`| `DateTime?`             | Soft delete                                        |
+
+### AccessRequest / AccessResult
+
+High-volume tables — use **BigInt** primary keys to avoid 32-bit overflow. `AccessResult` is a 1:1 with `AccessRequest` (written after the door controller responds). BigInt values are serialised as decimal strings in all API responses.
 
 ---
 
@@ -173,7 +221,9 @@ Register form
 
 ### Google OAuth
 
-Configured via `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` (optional). OAuth users have `password: null`.
+Sign-in and sign-up pages both have a "Continue / Sign up with Google" button. On first Google login the user is created automatically with `status: ACTIVE`. On subsequent logins the existing row is reused — no duplicate is created. Disabled (`DISABLED`) or deleted accounts are blocked even via Google.
+
+Requires `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in env. Add `<NEXTAUTH_URL>/api/auth/callback/google` to the Authorized Redirect URIs in Google Cloud Console.
 
 ---
 
@@ -181,19 +231,44 @@ Configured via `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` (optional). OAuth use
 
 ### Public endpoints (no auth required)
 
-| Method | Path              | Description                          |
-| ------ | ----------------- | ------------------------------------ |
-| `GET`  | `/api/health`     | Server + DB health check             |
-| `POST` | `/api/auth/login` | Credential verification (Basic Auth) |
-| `POST` | `/api/users`      | Register new user (Basic Auth)       |
-| `ALL`  | `/api/auth/*`     | NextAuth internal routes             |
+| Method | Path              | Description                                  |
+| ------ | ----------------- | -------------------------------------------- |
+| `GET`  | `/api/health`     | Server + DB health check                     |
+| `POST` | `/api/auth/login` | Credential verification (Basic Auth)         |
+| `POST` | `/api/users`      | Register new user (Basic Auth)               |
+| `ALL`  | `/api/auth/*`     | NextAuth internal routes (OAuth callbacks)   |
+| `GET`  | `/api/docs`       | OpenAPI 3.0 JSON spec (machine-readable)     |
 
-### Protected endpoints (NextAuth JWT required)
+### Admin endpoints (SUPER_ADMIN JWT required)
 
-| Method | Path                | Description      |
-| ------ | ------------------- | ---------------- |
-| `GET`  | `/api/devices`      | List devices     |
-| `GET`  | `/api/devices/[id]` | Get device by ID |
+All paths are under `/api/admin/`. Every list endpoint is paginated (`page`, `limit` query params).
+
+| Method   | Path                              | Description                        |
+| -------- | --------------------------------- | ---------------------------------- |
+| `GET`    | `/api/admin/users`                | List users (filters: role, status) |
+| `POST`   | `/api/admin/users`                | Create user                        |
+| `GET`    | `/api/admin/users/[id]`           | Get user by ID                     |
+| `PATCH`  | `/api/admin/users/[id]`           | Update user                        |
+| `DELETE` | `/api/admin/users/[id]`           | Soft-delete user                   |
+| `GET`    | `/api/admin/rooms`                | List rooms                         |
+| `POST`   | `/api/admin/rooms`                | Create room                        |
+| `GET`    | `/api/admin/rooms/[id]`           | Get room by ID                     |
+| `PATCH`  | `/api/admin/rooms/[id]`           | Update room                        |
+| `DELETE` | `/api/admin/rooms/[id]`           | Soft-delete room                   |
+| `GET`    | `/api/admin/access-cards`         | List access cards                  |
+| `POST`   | `/api/admin/access-cards`         | Create access card                 |
+| `GET`    | `/api/admin/access-cards/[id]`    | Get card by ID                     |
+| `PATCH`  | `/api/admin/access-cards/[id]`    | Update card                        |
+| `DELETE` | `/api/admin/access-cards/[id]`    | Soft-delete card                   |
+| `GET`    | `/api/admin/access-permissions`   | List permissions                   |
+| `POST`   | `/api/admin/access-permissions`   | Create permission                  |
+| `GET`    | `/api/admin/access-permissions/[id]` | Get permission by ID            |
+| `PATCH`  | `/api/admin/access-permissions/[id]` | Update permission               |
+| `DELETE` | `/api/admin/access-permissions/[id]` | Soft-delete permission          |
+| `GET`    | `/api/admin/access-requests`      | List access requests (read-only)   |
+| `GET`    | `/api/admin/access-requests/[id]` | Get request by BigInt ID           |
+| `GET`    | `/api/admin/access-results`       | List access results (read-only)    |
+| `GET`    | `/api/admin/access-results/[id]`  | Get result by BigInt ID            |
 
 All unrecognised `/api/*` routes without a valid session cookie return:
 
@@ -203,19 +278,19 @@ All unrecognised `/api/*` routes without a valid session cookie return:
 
 with HTTP `401`.
 
-### Health check response
+---
 
-**200 OK**
+## API Documentation (Swagger UI)
 
-```json
-{ "status": "ok", "db": "ok" }
-```
+Interactive docs are available at `/docs`. The JSON spec is at `/api/docs`.
 
-**503 Service Unavailable**
+**Auth flow in Swagger UI:**
+1. Expand `POST /api/auth/login`, click **Try it out**, enter credentials under the BasicAuth scheme
+2. Copy the `token` from the response
+3. Click **Authorize** at the top and paste the token under **BearerAuth**
+4. All `/api/admin/*` requests now include `Authorization: Bearer <token>`
 
-```json
-{ "status": "degraded", "db": "error" }
-```
+The spec is generated at runtime from Zod schemas via `@asteasolutions/zod-to-openapi`. All schemas are created inside `getOpenApiSpec()` — after `extendZodWithOpenApi(z)` runs — to avoid a Zod 4 production incompatibility where the `.openapi()` method is not retroactively added to pre-existing schema instances.
 
 ---
 
@@ -223,11 +298,12 @@ with HTTP `401`.
 
 `proxy.ts` at the project root enforces authentication on every request before it reaches a route handler. Route tiers:
 
-| Tier         | Paths                                      | Rule                        |
-| ------------ | ------------------------------------------ | --------------------------- |
-| Public pages | `/`, `/login`, `/register`                 | Pass through                |
-| Public API   | `/api/auth/*`, `/api/health`, `/api/users` | Pass through                |
-| Protected    | Everything else                            | Valid NextAuth JWT required |
+| Tier         | Paths                                                           | Rule                             |
+| ------------ | --------------------------------------------------------------- | -------------------------------- |
+| Public pages | `/`, `/login`, `/register`                                      | Pass through                     |
+| Public API   | `/api/auth/*`, `/api/health`, `/api/users`, `/api/docs`         | Pass through                     |
+| Protected    | Everything else                                                 | Valid NextAuth JWT required      |
+| Admin API    | `/api/admin/*`                                                  | JWT + `SUPER_ADMIN` role required |
 
 ---
 
@@ -249,40 +325,76 @@ with HTTP `401`.
 ```
 .
 ├── app/
-│   ├── (auth)/               # Login + register pages (unauthenticated layout)
-│   │   ├── login/page.tsx
-│   │   └── register/page.tsx
-│   ├── (dashboard)/          # Protected pages (authenticated layout + header)
+│   ├── (auth)/                         # Unauthenticated layout
+│   │   ├── login/page.tsx              # Credentials + Google sign-in
+│   │   └── register/page.tsx           # Credentials + Google sign-up
+│   ├── (dashboard)/                    # Protected layout
 │   │   └── dashboard/page.tsx
 │   ├── api/
 │   │   ├── auth/
-│   │   │   ├── [...nextauth]/route.ts   # NextAuth handler
-│   │   │   └── login/route.ts           # Credential verification (Basic Auth)
+│   │   │   ├── [...nextauth]/route.ts  # NextAuth handler
+│   │   │   └── login/route.ts          # Credential verification (Basic Auth)
+│   │   ├── admin/
+│   │   │   ├── users/[id]/route.ts
+│   │   │   ├── users/route.ts
+│   │   │   ├── rooms/[id]/route.ts
+│   │   │   ├── rooms/route.ts
+│   │   │   ├── access-cards/[id]/route.ts
+│   │   │   ├── access-cards/route.ts
+│   │   │   ├── access-permissions/[id]/route.ts
+│   │   │   ├── access-permissions/route.ts
+│   │   │   ├── access-requests/[id]/route.ts
+│   │   │   ├── access-requests/route.ts
+│   │   │   ├── access-results/[id]/route.ts
+│   │   │   └── access-results/route.ts
+│   │   ├── docs/route.ts               # GET → OpenAPI JSON spec (public)
 │   │   ├── health/route.ts
-│   │   └── users/route.ts               # Registration
+│   │   └── users/route.ts              # Registration
+│   ├── docs/
+│   │   ├── page.tsx                    # Swagger UI page (auth-protected)
+│   │   └── SwaggerUI.tsx               # "use client" wrapper for swagger-ui-react
 │   └── layout.tsx
 ├── components/
 │   ├── auth/SessionProvider.tsx
 │   └── layout/LogoutButton.tsx
+├── hooks/
+│   ├── useDevice.ts
+│   └── useSession.ts
 ├── lib/
 │   ├── api/
-│   │   └── users.ts                     # createUser — hashes password, writes to DB
+│   │   ├── devices.ts
+│   │   └── users.ts                    # createUser — hashes password, writes to DB
 │   ├── auth/
-│   │   ├── auth.ts                      # NextAuth options
+│   │   ├── auth.ts                     # NextAuth options (JWT, callbacks, providers)
 │   │   └── providers/
-│   │       ├── credential.ts            # HMAC token-based credentials provider
+│   │       ├── credential.ts           # HMAC token-based credentials provider
 │   │       └── google.ts
-│   ├── db.ts                            # Prisma client singleton (PrismaPg adapter)
-│   ├── env.ts                           # Type-safe env vars (t3-env)
+│   ├── openapi/
+│   │   ├── parameters.ts               # Reusable query/path param factory
+│   │   ├── schemas.ts                  # Request + response schema factory
+│   │   └── spec.ts                     # Registers all paths, exports getOpenApiSpec()
+│   ├── db.ts                           # Prisma client singleton (PrismaPg adapter)
+│   ├── env.ts                          # Type-safe env vars (t3-env)
 │   └── validations/
-│       └── user.ts                      # Zod schemas
+│       ├── access-card.ts
+│       ├── access-permission.ts
+│       ├── room.ts
+│       └── user.ts
 ├── prisma/
 │   ├── schema/
 │   │   ├── base.prisma
-│   │   └── user.prisma
+│   │   ├── user.prisma
+│   │   ├── room.prisma
+│   │   ├── access-card.prisma
+│   │   ├── access-permission.prisma
+│   │   ├── access-request.prisma
+│   │   └── access-result.prisma
 │   └── migrations/
-├── proxy.ts                             # Auth enforcement (Edge runtime)
-├── prisma.config.ts                     # Prisma CLI config (migration URLs)
+├── types/
+│   ├── auth.d.ts                       # NextAuth type augmentations
+│   └── device.ts
+├── proxy.ts                            # Auth enforcement (Edge runtime)
+├── prisma.config.ts                    # Prisma CLI config (migration URLs)
 └── local-db/
     └── docker-compose.postgres.yml
 ```
