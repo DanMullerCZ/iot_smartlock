@@ -21,11 +21,14 @@ export const CREDENTIAL_PROVIDER: Provider = CredentialsProvider({
             !credentials.name ||
             !credentials.issuedAt ||
             !credentials.token
-        )
+        ) {
             return null;
+        }
 
         const issuedAt = parseInt(credentials.issuedAt, 10);
-        if (Date.now() - issuedAt > TOKEN_TTL_MS) return null;
+        if (Date.now() - issuedAt > TOKEN_TTL_MS) {
+            return null;
+        }
 
         const expected = generatePreAuthToken(
             credentials.email,
@@ -33,7 +36,10 @@ export const CREDENTIAL_PROVIDER: Provider = CredentialsProvider({
             credentials.name,
             issuedAt,
         );
-        if (expected !== credentials.token) return null;
+
+        if (expected !== credentials.token) {
+            return null;
+        }
 
         return { id: credentials.uuid, name: credentials.name, email: credentials.email };
     },

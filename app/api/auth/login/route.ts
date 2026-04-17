@@ -30,21 +30,17 @@ export async function POST(request: Request) {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await prisma.user
-        .findUnique({
-            where: { email: credentials.email },
-            select: {
-                uuid: true,
-                name: true,
-                email: true,
-                password: true,
-                status: true,
-                deletedAt: true,
-            },
-        })
-        .catch(() => {
-            return null;
-        });
+    const user = await prisma.user.findUnique({
+        where: { email: credentials.email },
+        select: {
+            uuid: true,
+            name: true,
+            email: true,
+            password: true,
+            status: true,
+            deletedAt: true,
+        },
+    });
 
     if (!user?.password || user.deletedAt !== null) {
         return Response.json({ error: "Invalid credentials" }, { status: 401 });
