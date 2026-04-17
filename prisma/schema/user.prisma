@@ -1,0 +1,37 @@
+model User {
+  // Identifiers
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid())       @db.Uuid
+
+  // Credentials
+  email     String   @unique                        @db.VarChar(254)
+  name      String                                  @db.VarChar(100)
+  password  String?                                 @db.VarChar(255)
+
+  // Permissions
+  role      Role     @default(USER)
+
+  // Extras
+  status    Status   @default(NOT_VERIFIED)
+
+  // Date columns
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([deletedAt])
+  @@index([createdAt])
+  @@index([deletedAt, status])
+}
+
+enum Status {
+  NOT_VERIFIED
+  ACTIVE
+  DISABLED
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}

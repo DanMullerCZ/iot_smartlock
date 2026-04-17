@@ -1,0 +1,16 @@
+services:
+  smartlock_postgres:
+    image: postgres:18-alpine3.22
+    container_name: smartlock_postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: smartlock_local
+    ports:
+      - "5431:5432"
+    volumes:
+      - smartlock_postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  smartlock_postgres_data:

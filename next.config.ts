@@ -1,7 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  logging: {
+      incomingRequests: {
+          ignore: [/\/api\/health/],
+      },
+      serverFunctions: true,
+      fetches: {
+          fullUrl: true,
+          hmrRefreshes: false,
+      },
+      browserToTerminal: true,
+  }
 };
 
 export default nextConfig;
