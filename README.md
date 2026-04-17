@@ -4,17 +4,17 @@ Web application for managing IoT smart lock devices. Built with Next.js 16, Pris
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 16 (App Router) |
-| Language | TypeScript 5 |
-| Database ORM | Prisma 7 (multi-file schema) |
-| Database | PostgreSQL 18 |
-| Authentication | NextAuth v4 — credentials + Google OAuth |
-| Password hashing | argon2 |
-| Validation | Zod 4 |
-| Styling | Tailwind CSS 4 |
-| DB adapter | `@prisma/adapter-pg` (connection pooling) |
+| Layer            | Technology                                |
+| ---------------- | ----------------------------------------- |
+| Framework        | Next.js 16 (App Router)                   |
+| Language         | TypeScript 5                              |
+| Database ORM     | Prisma 7 (multi-file schema)              |
+| Database         | PostgreSQL 18                             |
+| Authentication   | NextAuth v4 — credentials + Google OAuth  |
+| Password hashing | argon2                                    |
+| Validation       | Zod 4                                     |
+| Styling          | Tailwind CSS 4                            |
+| DB adapter       | `@prisma/adapter-pg` (connection pooling) |
 
 ---
 
@@ -47,12 +47,12 @@ docker compose -f local-db/docker-compose.postgres.yml up -d
 
 Container details:
 
-| Setting | Value |
-|---|---|
-| Host | `localhost:5431` |
+| Setting  | Value             |
+| -------- | ----------------- |
+| Host     | `localhost:5431`  |
 | Database | `smartlock_local` |
-| User | `admin` |
-| Password | `admin` |
+| User     | `admin`           |
+| Password | `admin`           |
 
 ### 3. Configure environment
 
@@ -95,17 +95,17 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## npm Scripts
 
-| Script | What it does |
-|---|---|
-| `npm run dev` | Start Next.js dev server |
-| `npm run build` | Generate Prisma client, then build for production |
-| `npm run start` | Start production server |
-| `npm run lint` | Run ESLint |
-| `npm run db:generate` | Regenerate Prisma client from schema (no migration) |
-| `npm run db:migrate` | Create + apply a new migration (dev only) |
-| `npm run db:migrate:deploy` | Apply pending migrations (production / CI) |
-| `npm run db:push` | Push schema changes without a migration file (prototyping only) |
-| `npm run db:studio` | Open Prisma Studio at http://localhost:5555 |
+| Script                      | What it does                                                    |
+| --------------------------- | --------------------------------------------------------------- |
+| `npm run dev`               | Start Next.js dev server                                        |
+| `npm run build`             | Generate Prisma client, then build for production               |
+| `npm run start`             | Start production server                                         |
+| `npm run lint`              | Run ESLint                                                      |
+| `npm run db:generate`       | Regenerate Prisma client from schema (no migration)             |
+| `npm run db:migrate`        | Create + apply a new migration (dev only)                       |
+| `npm run db:migrate:deploy` | Apply pending migrations (production / CI)                      |
+| `npm run db:push`           | Push schema changes without a migration file (prototyping only) |
+| `npm run db:studio`         | Open Prisma Studio at http://localhost:5555                     |
 
 ---
 
@@ -125,17 +125,17 @@ Adding a new model: create `prisma/schema/<model>.prisma` and run `npm run db:mi
 
 ### User model summary
 
-| Column | Type | Notes |
-|---|---|---|
-| `id` | `Int` PK | Internal numeric ID |
-| `uuid` | `UUID` | Public-facing identifier, unique index |
-| `email` | `VARCHAR(254)` | Unique, RFC 5321 max length |
-| `name` | `VARCHAR(100)` | Display name |
-| `password` | `VARCHAR(255)?` | argon2id hash; `null` for OAuth-only accounts |
-| `role` | `Role` enum | `USER` / `ADMIN` / `SUPER_ADMIN` |
-| `status` | `Status` enum | `NOT_VERIFIED` / `ACTIVE` / `DISABLED` |
-| `createdAt` | `DateTime` | Indexed for pagination |
-| `deletedAt` | `DateTime?` | Soft delete; indexed + composite index with `status` |
+| Column      | Type            | Notes                                                |
+| ----------- | --------------- | ---------------------------------------------------- |
+| `id`        | `Int` PK        | Internal numeric ID                                  |
+| `uuid`      | `UUID`          | Public-facing identifier, unique index               |
+| `email`     | `VARCHAR(254)`  | Unique, RFC 5321 max length                          |
+| `name`      | `VARCHAR(100)`  | Display name                                         |
+| `password`  | `VARCHAR(255)?` | argon2id hash; `null` for OAuth-only accounts        |
+| `role`      | `Role` enum     | `USER` / `ADMIN` / `SUPER_ADMIN`                     |
+| `status`    | `Status` enum   | `NOT_VERIFIED` / `ACTIVE` / `DISABLED`               |
+| `createdAt` | `DateTime`      | Indexed for pagination                               |
+| `deletedAt` | `DateTime?`     | Soft delete; indexed + composite index with `status` |
 
 `updatedAt` is managed automatically by Prisma on every update.
 
@@ -181,19 +181,19 @@ Configured via `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` (optional). OAuth use
 
 ### Public endpoints (no auth required)
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/health` | Server + DB health check |
+| Method | Path              | Description                          |
+| ------ | ----------------- | ------------------------------------ |
+| `GET`  | `/api/health`     | Server + DB health check             |
 | `POST` | `/api/auth/login` | Credential verification (Basic Auth) |
-| `POST` | `/api/users` | Register new user (Basic Auth) |
-| `ALL` | `/api/auth/*` | NextAuth internal routes |
+| `POST` | `/api/users`      | Register new user (Basic Auth)       |
+| `ALL`  | `/api/auth/*`     | NextAuth internal routes             |
 
 ### Protected endpoints (NextAuth JWT required)
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/devices` | List devices |
-| `GET` | `/api/devices/[id]` | Get device by ID |
+| Method | Path                | Description      |
+| ------ | ------------------- | ---------------- |
+| `GET`  | `/api/devices`      | List devices     |
+| `GET`  | `/api/devices/[id]` | Get device by ID |
 
 All unrecognised `/api/*` routes without a valid session cookie return:
 
@@ -206,11 +206,13 @@ with HTTP `401`.
 ### Health check response
 
 **200 OK**
+
 ```json
 { "status": "ok", "db": "ok" }
 ```
 
 **503 Service Unavailable**
+
 ```json
 { "status": "degraded", "db": "error" }
 ```
@@ -221,24 +223,24 @@ with HTTP `401`.
 
 `proxy.ts` at the project root enforces authentication on every request before it reaches a route handler. Route tiers:
 
-| Tier | Paths | Rule |
-|---|---|---|
-| Public pages | `/`, `/login`, `/register` | Pass through |
-| Public API | `/api/auth/*`, `/api/health`, `/api/users` | Pass through |
-| Protected | Everything else | Valid NextAuth JWT required |
+| Tier         | Paths                                      | Rule                        |
+| ------------ | ------------------------------------------ | --------------------------- |
+| Public pages | `/`, `/login`, `/register`                 | Pass through                |
+| Public API   | `/api/auth/*`, `/api/health`, `/api/users` | Pass through                |
+| Protected    | Everything else                            | Valid NextAuth JWT required |
 
 ---
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|---|---|---|
-| `NEXTAUTH_SECRET` | Yes | JWT signing secret. Generate: `openssl rand -base64 32` |
-| `NEXTAUTH_URL` | Yes | Full base URL of the app (`http://localhost:3000` in dev) |
-| `DATABASE_URL` | Yes | PostgreSQL connection string used by Prisma client at runtime |
-| `DATABASE_DIRECT_URL` | Yes | Direct (non-pooled) connection used by `prisma migrate` |
-| `GOOGLE_CLIENT_ID` | No | Google OAuth app client ID |
-| `GOOGLE_CLIENT_SECRET` | No | Google OAuth app client secret |
+| Variable               | Required | Description                                                   |
+| ---------------------- | -------- | ------------------------------------------------------------- |
+| `NEXTAUTH_SECRET`      | Yes      | JWT signing secret. Generate: `openssl rand -base64 32`       |
+| `NEXTAUTH_URL`         | Yes      | Full base URL of the app (`http://localhost:3000` in dev)     |
+| `DATABASE_URL`         | Yes      | PostgreSQL connection string used by Prisma client at runtime |
+| `DATABASE_DIRECT_URL`  | Yes      | Direct (non-pooled) connection used by `prisma migrate`       |
+| `GOOGLE_CLIENT_ID`     | No       | Google OAuth app client ID                                    |
+| `GOOGLE_CLIENT_SECRET` | No       | Google OAuth app client secret                                |
 
 ---
 
