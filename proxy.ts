@@ -3,6 +3,20 @@ import { getToken } from "next-auth/jwt";
 
 const PUBLIC_API_PREFIXES = ["/api/auth", "/api/health", "/api/users", "/api/docs"];
 const PUBLIC_PAGES = ["/", "/login", "/register"];
+const ADMIN_PAGE_PREFIXES = [
+    "/dashboard",
+    "/users",
+    "/rooms",
+    "/access-cards",
+    "/permissions",
+    "/access-logs",
+];
+
+function matchesPathPrefix(pathname: string, prefixes: string[]) {
+    return prefixes.some((prefix) => {
+        return pathname === prefix || pathname.startsWith(`${prefix}/`);
+    });
+}
 
 export async function proxy(req: NextRequest) {
     const { pathname } = req.nextUrl;
@@ -30,8 +44,15 @@ export async function proxy(req: NextRequest) {
         return NextResponse.redirect(loginUrl);
     }
 
-    if (pathname.startsWith("/api/admin/") && token.role !== "SUPER_ADMIN") {
-        return Response.json({ error: "Forbidden" }, { status: 403 });
+    const isAdminApi = pathname.startsWith("/api/admin/");
+    const isAdminPage = matchesPathPrefix(pathname, ADMIN_PAGE_PREFIXES);
+
+    if ((isAdminApi || isAdminPage) && token.role !== "SUPER_ADMIN") {
+        if (isAdminApi) {
+            return Response.json({ error: "Forbidden" }, { status: 403 });
+        }
+
+        return new Response("Forbidden", { status: 403 });
     }
 
     return NextResponse.next();

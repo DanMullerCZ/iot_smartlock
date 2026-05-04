@@ -1,28 +1,68 @@
-import type { Session } from "next-auth";
+import { User } from "lucide-react";
 import { getServerSession } from "next-auth/next";
 
-import LogoutButton from "@/components/layout/LogoutButton";
+import { StatusBadge, type StatusValue } from "@/components/admin/StatusBadge";
+import { AppSidebar } from "@/components/layout/app-sidebar";
+import LogoutButton from "@/components/misc/logout-button";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Kbd } from "@/components/ui/kbd";
+import { Separator } from "@/components/ui/separator";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { authOptions } from "@/lib/auth/auth";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-    const session: Session | null = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions);
 
     const signedUserName = session ? (session.user.name ?? "Unknown user") : "Not logged in";
+    const signedUserRole = (session?.user.role ?? "USER") as StatusValue;
 
     return (
-        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
-            <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-3 dark:border-zinc-700 dark:bg-zinc-800">
-                <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-                    SmartLock
-                </span>
-                <div className="flex items-center gap-3">
-                    <span className="text-sm text-zinc-500 dark:text-zinc-400">
-                        {signedUserName}
-                    </span>
-                    <LogoutButton />
-                </div>
-            </header>
-            <main className="p-6">{children}</main>
-        </div>
+        <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset>
+                <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4">
+                    <div className="flex items-center gap-3">
+                        <SidebarTrigger />
+                        <Kbd>⌘ + B</Kbd>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <StatusBadge value={signedUserRole} />
+
+                        <Separator orientation="vertical" />
+
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost">
+                                    <User />
+                                    {signedUserName}
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuGroup>
+                                    <DropdownMenuItem asChild>
+                                        <LogoutButton />
+                                    </DropdownMenuItem>
+                                </DropdownMenuGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <Separator orientation="vertical" />
+
+                        <ThemeToggle />
+                    </div>
+                </header>
+
+                <div className="flex flex-1 flex-col gap-4 p-8 overflow-auto">{children}</div>
+            </SidebarInset>
+        </SidebarProvider>
     );
 }
