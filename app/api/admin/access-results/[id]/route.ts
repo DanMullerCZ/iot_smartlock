@@ -3,7 +3,9 @@ import type { NextRequest } from "next/server";
 import { jsonBigInt } from "@/lib/api/bigint";
 import { prisma } from "@/lib/db";
 
-interface Params { params: Promise<{ id: string }> }
+interface Params {
+    params: Promise<{ id: string }>;
+}
 
 export async function GET(_req: NextRequest, { params }: Params) {
     const { id } = await params;

@@ -21,12 +21,12 @@ export const authOptions: NextAuthOptions = {
             if (account?.provider === "google") {
                 const dbUser = await prisma.user.findUnique({
                     where: {
-                        email: user.email!
+                        email: user.email!,
                     },
                     select: {
                         uuid: true,
                         role: true,
-                    }
+                    },
                 });
                 token.id = dbUser!.uuid;
                 token.role = dbUser!.role;
@@ -55,12 +55,12 @@ export const authOptions: NextAuthOptions = {
             }
             const existing = await prisma.user.findUnique({
                 where: {
-                    email: user.email!
+                    email: user.email!,
                 },
                 select: {
                     status: true,
-                    deletedAt: true
-                }
+                    deletedAt: true,
+                },
             });
 
             if (existing?.deletedAt || existing?.status === "DISABLED") {
@@ -74,7 +74,6 @@ export const authOptions: NextAuthOptions = {
             });
 
             return true;
-
         },
     },
 };

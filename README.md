@@ -4,17 +4,17 @@ Web application for managing IoT smart lock devices. Built with Next.js 16, Pris
 
 ## Tech Stack
 
-| Layer            | Technology                                |
-| ---------------- | ----------------------------------------- |
-| Framework        | Next.js 16 (App Router)                   |
-| Language         | TypeScript 5                              |
-| Database ORM     | Prisma 7 (multi-file schema)              |
-| Database         | PostgreSQL 18                             |
-| Authentication   | NextAuth v4 — credentials + Google OAuth  |
-| Password hashing | argon2                                    |
-| Validation       | Zod 4                                     |
-| Styling          | Tailwind CSS 4                            |
-| DB adapter       | `@prisma/adapter-pg` (connection pooling) |
+| Layer            | Technology                                                    |
+| ---------------- | ------------------------------------------------------------- |
+| Framework        | Next.js 16 (App Router)                                       |
+| Language         | TypeScript 5                                                  |
+| Database ORM     | Prisma 7 (multi-file schema)                                  |
+| Database         | PostgreSQL 18                                                 |
+| Authentication   | NextAuth v4 — credentials + Google OAuth                      |
+| Password hashing | argon2                                                        |
+| Validation       | Zod 4                                                         |
+| Styling          | Tailwind CSS 4                                                |
+| DB adapter       | `@prisma/adapter-pg` (connection pooling)                     |
 | API docs         | OpenAPI 3.0 via `@asteasolutions/zod-to-openapi` + Swagger UI |
 
 ---
@@ -148,40 +148,40 @@ Adding a new model: create `prisma/schema/<model>.prisma` and run `npm run db:mi
 
 ### Room
 
-| Column        | Type           | Notes                                    |
-| ------------- | -------------- | ---------------------------------------- |
-| `id`          | `Int` PK       |                                          |
-| `uuid`        | `UUID`         | Public identifier                        |
-| `name`        | `VARCHAR(100)` |                                          |
-| `location`    | `TEXT?`        |                                          |
-| `description` | `TEXT?`        |                                          |
-| `status`      | `RoomStatus`   | `ACTIVE` / `BLOCKED` / `DISABLED`        |
-| `deletedAt`   | `DateTime?`    | Soft delete                              |
+| Column        | Type           | Notes                             |
+| ------------- | -------------- | --------------------------------- |
+| `id`          | `Int` PK       |                                   |
+| `uuid`        | `UUID`         | Public identifier                 |
+| `name`        | `VARCHAR(100)` |                                   |
+| `location`    | `TEXT?`        |                                   |
+| `description` | `TEXT?`        |                                   |
+| `status`      | `RoomStatus`   | `ACTIVE` / `BLOCKED` / `DISABLED` |
+| `deletedAt`   | `DateTime?`    | Soft delete                       |
 
 ### AccessCard
 
-| Column       | Type           | Notes                                            |
-| ------------ | -------------- | ------------------------------------------------ |
-| `id`         | `Int` PK       |                                                  |
-| `uuid`       | `UUID`         |                                                  |
-| `code`       | `VARCHAR(128)` | Unique RFID/NFC code                             |
-| `type`       | `CardType`     | `RFID`                                           |
-| `status`     | `CardStatus`   | `ACTIVE` / `DISABLED`                            |
-| `userId`     | `Int?` FK      | Owning user; `null` = unassigned                 |
-| `assignedAt` | `DateTime?`    | When the card was last assigned                  |
-| `deletedAt`  | `DateTime?`    | Soft delete                                      |
+| Column       | Type           | Notes                            |
+| ------------ | -------------- | -------------------------------- |
+| `id`         | `Int` PK       |                                  |
+| `uuid`       | `UUID`         |                                  |
+| `code`       | `VARCHAR(128)` | Unique RFID/NFC code             |
+| `type`       | `CardType`     | `RFID`                           |
+| `status`     | `CardStatus`   | `ACTIVE` / `DISABLED`            |
+| `userId`     | `Int?` FK      | Owning user; `null` = unassigned |
+| `assignedAt` | `DateTime?`    | When the card was last assigned  |
+| `deletedAt`  | `DateTime?`    | Soft delete                      |
 
 ### AccessPermission
 
-| Column     | Type                    | Notes                                              |
-| ---------- | ----------------------- | -------------------------------------------------- |
-| `id`       | `Int` PK                |                                                    |
-| `userId`   | `Int` FK                |                                                    |
-| `roomId`   | `Int` FK                |                                                    |
-| `status`   | `PermissionStatus`      | `ACTIVE` / `SUSPENDED` / `EXPIRED`                 |
-| `from`     | `DateTime?`             | Permission valid from                              |
-| `to`       | `DateTime?`             | Permission valid until                             |
-| `deletedAt`| `DateTime?`             | Soft delete                                        |
+| Column      | Type               | Notes                              |
+| ----------- | ------------------ | ---------------------------------- |
+| `id`        | `Int` PK           |                                    |
+| `userId`    | `Int` FK           |                                    |
+| `roomId`    | `Int` FK           |                                    |
+| `status`    | `PermissionStatus` | `ACTIVE` / `SUSPENDED` / `EXPIRED` |
+| `from`      | `DateTime?`        | Permission valid from              |
+| `to`        | `DateTime?`        | Permission valid until             |
+| `deletedAt` | `DateTime?`        | Soft delete                        |
 
 ### AccessRequest / AccessResult
 
@@ -231,44 +231,44 @@ Requires `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in env. Add `<NEXTAUTH_UR
 
 ### Public endpoints (no auth required)
 
-| Method | Path              | Description                                  |
-| ------ | ----------------- | -------------------------------------------- |
-| `GET`  | `/api/health`     | Server + DB health check                     |
-| `POST` | `/api/auth/login` | Credential verification (Basic Auth)         |
-| `POST` | `/api/users`      | Register new user (Basic Auth)               |
-| `ALL`  | `/api/auth/*`     | NextAuth internal routes (OAuth callbacks)   |
-| `GET`  | `/api/docs`       | OpenAPI 3.0 JSON spec (machine-readable)     |
+| Method | Path              | Description                                |
+| ------ | ----------------- | ------------------------------------------ |
+| `GET`  | `/api/health`     | Server + DB health check                   |
+| `POST` | `/api/auth/login` | Credential verification (Basic Auth)       |
+| `POST` | `/api/users`      | Register new user (Basic Auth)             |
+| `ALL`  | `/api/auth/*`     | NextAuth internal routes (OAuth callbacks) |
+| `GET`  | `/api/docs`       | OpenAPI 3.0 JSON spec (machine-readable)   |
 
 ### Admin endpoints (SUPER_ADMIN JWT required)
 
 All paths are under `/api/admin/`. Every list endpoint is paginated (`page`, `limit` query params).
 
-| Method   | Path                              | Description                        |
-| -------- | --------------------------------- | ---------------------------------- |
-| `GET`    | `/api/admin/users`                | List users (filters: role, status) |
-| `POST`   | `/api/admin/users`                | Create user                        |
-| `GET`    | `/api/admin/users/[id]`           | Get user by ID                     |
-| `PATCH`  | `/api/admin/users/[id]`           | Update user                        |
-| `DELETE` | `/api/admin/users/[id]`           | Soft-delete user                   |
-| `GET`    | `/api/admin/rooms`                | List rooms                         |
-| `POST`   | `/api/admin/rooms`                | Create room                        |
-| `GET`    | `/api/admin/rooms/[id]`           | Get room by ID                     |
-| `PATCH`  | `/api/admin/rooms/[id]`           | Update room                        |
-| `DELETE` | `/api/admin/rooms/[id]`           | Soft-delete room                   |
-| `GET`    | `/api/admin/access-cards`         | List access cards                  |
-| `POST`   | `/api/admin/access-cards`         | Create access card                 |
-| `GET`    | `/api/admin/access-cards/[id]`    | Get card by ID                     |
-| `PATCH`  | `/api/admin/access-cards/[id]`    | Update card                        |
-| `DELETE` | `/api/admin/access-cards/[id]`    | Soft-delete card                   |
-| `GET`    | `/api/admin/access-permissions`   | List permissions                   |
-| `POST`   | `/api/admin/access-permissions`   | Create permission                  |
-| `GET`    | `/api/admin/access-permissions/[id]` | Get permission by ID            |
-| `PATCH`  | `/api/admin/access-permissions/[id]` | Update permission               |
-| `DELETE` | `/api/admin/access-permissions/[id]` | Soft-delete permission          |
-| `GET`    | `/api/admin/access-requests`      | List access requests (read-only)   |
-| `GET`    | `/api/admin/access-requests/[id]` | Get request by BigInt ID           |
-| `GET`    | `/api/admin/access-results`       | List access results (read-only)    |
-| `GET`    | `/api/admin/access-results/[id]`  | Get result by BigInt ID            |
+| Method   | Path                                 | Description                        |
+| -------- | ------------------------------------ | ---------------------------------- |
+| `GET`    | `/api/admin/users`                   | List users (filters: role, status) |
+| `POST`   | `/api/admin/users`                   | Create user                        |
+| `GET`    | `/api/admin/users/[id]`              | Get user by ID                     |
+| `PATCH`  | `/api/admin/users/[id]`              | Update user                        |
+| `DELETE` | `/api/admin/users/[id]`              | Soft-delete user                   |
+| `GET`    | `/api/admin/rooms`                   | List rooms                         |
+| `POST`   | `/api/admin/rooms`                   | Create room                        |
+| `GET`    | `/api/admin/rooms/[id]`              | Get room by ID                     |
+| `PATCH`  | `/api/admin/rooms/[id]`              | Update room                        |
+| `DELETE` | `/api/admin/rooms/[id]`              | Soft-delete room                   |
+| `GET`    | `/api/admin/access-cards`            | List access cards                  |
+| `POST`   | `/api/admin/access-cards`            | Create access card                 |
+| `GET`    | `/api/admin/access-cards/[id]`       | Get card by ID                     |
+| `PATCH`  | `/api/admin/access-cards/[id]`       | Update card                        |
+| `DELETE` | `/api/admin/access-cards/[id]`       | Soft-delete card                   |
+| `GET`    | `/api/admin/access-permissions`      | List permissions                   |
+| `POST`   | `/api/admin/access-permissions`      | Create permission                  |
+| `GET`    | `/api/admin/access-permissions/[id]` | Get permission by ID               |
+| `PATCH`  | `/api/admin/access-permissions/[id]` | Update permission                  |
+| `DELETE` | `/api/admin/access-permissions/[id]` | Soft-delete permission             |
+| `GET`    | `/api/admin/access-requests`         | List access requests (read-only)   |
+| `GET`    | `/api/admin/access-requests/[id]`    | Get request by BigInt ID           |
+| `GET`    | `/api/admin/access-results`          | List access results (read-only)    |
+| `GET`    | `/api/admin/access-results/[id]`     | Get result by BigInt ID            |
 
 All unrecognised `/api/*` routes without a valid session cookie return:
 
@@ -285,6 +285,7 @@ with HTTP `401`.
 Interactive docs are available at `/docs`. The JSON spec is at `/api/docs`.
 
 **Auth flow in Swagger UI:**
+
 1. Expand `POST /api/auth/login`, click **Try it out**, enter credentials under the BasicAuth scheme
 2. Copy the `token` from the response
 3. Click **Authorize** at the top and paste the token under **BearerAuth**
@@ -298,12 +299,12 @@ The spec is generated at runtime from Zod schemas via `@asteasolutions/zod-to-op
 
 `proxy.ts` at the project root enforces authentication on every request before it reaches a route handler. Route tiers:
 
-| Tier         | Paths                                                           | Rule                             |
-| ------------ | --------------------------------------------------------------- | -------------------------------- |
-| Public pages | `/`, `/login`, `/register`                                      | Pass through                     |
-| Public API   | `/api/auth/*`, `/api/health`, `/api/users`, `/api/docs`         | Pass through                     |
-| Protected    | Everything else                                                 | Valid NextAuth JWT required      |
-| Admin API    | `/api/admin/*`                                                  | JWT + `SUPER_ADMIN` role required |
+| Tier         | Paths                                                   | Rule                              |
+| ------------ | ------------------------------------------------------- | --------------------------------- |
+| Public pages | `/`, `/login`, `/register`                              | Pass through                      |
+| Public API   | `/api/auth/*`, `/api/health`, `/api/users`, `/api/docs` | Pass through                      |
+| Protected    | Everything else                                         | Valid NextAuth JWT required       |
+| Admin API    | `/api/admin/*`                                          | JWT + `SUPER_ADMIN` role required |
 
 ---
 

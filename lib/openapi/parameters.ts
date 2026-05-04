@@ -32,13 +32,10 @@ export function buildParameters(z: typeof Zod) {
     });
 
     const bigIntPathParams = z.object({
-        id: z
-            .string()
-            .regex(/^\d+$/)
-            .openapi({
-                description: "BigInt ID as a decimal string",
-                example: "1234567890123456789",
-            }),
+        id: z.string().regex(/^\d+$/).openapi({
+            description: "BigInt ID as a decimal string",
+            example: "1234567890123456789",
+        }),
     });
 
     return { paginationQuery, softDeleteQuery, intPathParams, bigIntPathParams };

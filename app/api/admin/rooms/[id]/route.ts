@@ -4,7 +4,9 @@ import z from "zod";
 import { prisma } from "@/lib/db";
 import { roomUpdateSchema } from "@/lib/validations/room";
 
-interface Params { params: Promise<{ id: string }> }
+interface Params {
+    params: Promise<{ id: string }>;
+}
 
 export async function GET(_req: NextRequest, { params }: Params) {
     const { id } = await params;
