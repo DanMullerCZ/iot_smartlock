@@ -85,7 +85,7 @@ GOOGLE_CLIENT_SECRET=
 npm run db:migrate
 ```
 
-This runs `prisma migrate dev`, which applies pending migrations and generates the Prisma client into `generated/prisma/`.
+This runs `prisma migrate dev`, which applies pending migrations and generates the Prisma client into `src/generated/prisma/`.
 
 ### 5. Start the dev server
 
@@ -297,7 +297,7 @@ The spec is generated at runtime from Zod schemas via `@asteasolutions/zod-to-op
 
 ## Middleware & Proxy
 
-`proxy.ts` at the project root enforces authentication on every request before it reaches a route handler. Route tiers:
+`src/proxy.ts` enforces authentication on every request before it reaches a route handler. Route tiers:
 
 | Tier         | Paths                                                   | Rule                              |
 | ------------ | ------------------------------------------------------- | --------------------------------- |
@@ -325,62 +325,34 @@ The spec is generated at runtime from Zod schemas via `@asteasolutions/zod-to-op
 
 ```
 .
-├── app/
-│   ├── (auth)/                         # Unauthenticated layout
-│   │   ├── login/page.tsx              # Credentials + Google sign-in
-│   │   └── register/page.tsx           # Credentials + Google sign-up
-│   ├── (dashboard)/                    # Protected layout
-│   │   └── dashboard/page.tsx
-│   ├── api/
-│   │   ├── auth/
-│   │   │   ├── [...nextauth]/route.ts  # NextAuth handler
-│   │   │   └── login/route.ts          # Credential verification (Basic Auth)
-│   │   ├── admin/
-│   │   │   ├── users/[id]/route.ts
-│   │   │   ├── users/route.ts
-│   │   │   ├── rooms/[id]/route.ts
-│   │   │   ├── rooms/route.ts
-│   │   │   ├── access-cards/[id]/route.ts
-│   │   │   ├── access-cards/route.ts
-│   │   │   ├── access-permissions/[id]/route.ts
-│   │   │   ├── access-permissions/route.ts
-│   │   │   ├── access-requests/[id]/route.ts
-│   │   │   ├── access-requests/route.ts
-│   │   │   ├── access-results/[id]/route.ts
-│   │   │   └── access-results/route.ts
-│   │   ├── docs/route.ts               # GET → OpenAPI JSON spec (public)
-│   │   ├── health/route.ts
-│   │   └── users/route.ts              # Registration
-│   ├── docs/
-│   │   ├── page.tsx                    # Swagger UI page (auth-protected)
-│   │   └── SwaggerUI.tsx               # "use client" wrapper for swagger-ui-react
-│   └── layout.tsx
-├── components/
-│   ├── auth/SessionProvider.tsx
-│   └── layout/LogoutButton.tsx
-├── hooks/
-│   ├── useDevice.ts
-│   └── useSession.ts
-├── lib/
-│   ├── api/
-│   │   ├── devices.ts
-│   │   └── users.ts                    # createUser — hashes password, writes to DB
-│   ├── auth/
-│   │   ├── auth.ts                     # NextAuth options (JWT, callbacks, providers)
-│   │   └── providers/
-│   │       ├── credential.ts           # HMAC token-based credentials provider
-│   │       └── google.ts
-│   ├── openapi/
-│   │   ├── parameters.ts               # Reusable query/path param factory
-│   │   ├── schemas.ts                  # Request + response schema factory
-│   │   └── spec.ts                     # Registers all paths, exports getOpenApiSpec()
-│   ├── db.ts                           # Prisma client singleton (PrismaPg adapter)
-│   ├── env.ts                          # Type-safe env vars (t3-env)
-│   └── validations/
-│       ├── access-card.ts
-│       ├── access-permission.ts
-│       ├── room.ts
-│       └── user.ts
+├── src/
+│   ├── app/                            # Next.js App Router routes and layouts
+│   │   ├── (auth)/                     # Login and registration pages
+│   │   ├── (dashboard)/                # Protected admin dashboard pages
+│   │   ├── api/                        # Route handlers
+│   │   ├── docs/                       # Swagger UI page
+│   │   └── layout.tsx
+│   ├── components/
+│   │   ├── admin/                      # Shared admin table primitives
+│   │   ├── features/                   # Feature-oriented UI modules
+│   │   ├── layout/                     # App shell components
+│   │   ├── misc/                       # Small shared presentational components
+│   │   ├── providers/                  # React providers
+│   │   └── ui/                         # shadcn/Radix UI primitives
+│   ├── hooks/                          # Shared React hooks
+│   ├── lib/
+│   │   ├── admin/                      # Admin dashboard types
+│   │   ├── api/                        # API helpers
+│   │   ├── auth/                       # NextAuth config and auth helpers
+│   │   ├── frontend/                   # Browser API/types helpers
+│   │   ├── openapi/                    # OpenAPI generation
+│   │   ├── server/                     # Server-only dashboard loaders/actions
+│   │   ├── validations/                # Zod schemas
+│   │   ├── db.ts                       # Prisma client singleton
+│   │   └── env.ts                      # Type-safe env vars
+│   ├── proxy.ts                        # Auth enforcement (Proxy)
+│   └── types/                          # Type augmentations
+├── public/                             # Static public assets
 ├── prisma/
 │   ├── schema/
 │   │   ├── base.prisma
@@ -391,10 +363,6 @@ The spec is generated at runtime from Zod schemas via `@asteasolutions/zod-to-op
 │   │   ├── access-request.prisma
 │   │   └── access-result.prisma
 │   └── migrations/
-├── types/
-│   ├── auth.d.ts                       # NextAuth type augmentations
-│   └── device.ts
-├── proxy.ts                            # Auth enforcement (Edge runtime)
 ├── prisma.config.ts                    # Prisma CLI config (migration URLs)
 └── local-db/
     └── docker-compose.postgres.yml
