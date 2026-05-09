@@ -1,5 +1,8 @@
-import { ResourceManager } from "@/components/admin/ResourceManager";
+import { UsersOverview } from "@/components/features/admin/users/components/users-overview";
+import { getUsersOverview } from "@/lib/server/admin-users";
 
-export default function UsersPage() {
-    return <ResourceManager resource="users" />;
+export default async function UsersPage() {
+    const data = await getUsersOverview();
+
+    return <UsersOverview data={data} />;
 }

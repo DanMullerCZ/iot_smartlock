@@ -4,13 +4,13 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 
-export default function UsersLoading() {
+export default function AccessCardsLoading() {
     return (
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
             <div className="space-y-6">
                 <PageHeader
-                    title="Rooms"
-                    description="Track protected rooms, locations, and room availability."
+                    title="Access Cards"
+                    description="Assign and monitor RFID cards used by SmartLock devices."
                 />
 
                 <Card>
@@ -20,7 +20,7 @@ export default function UsersLoading() {
 
                     <CardContent className="space-y-4">
                         <InputGroup>
-                            <InputGroupInput placeholder="Search users" disabled />
+                            <InputGroupInput placeholder="Search card code or owner" disabled />
 
                             <InputGroupAddon>
                                 <Spinner />

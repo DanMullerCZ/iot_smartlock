@@ -9,8 +9,8 @@ export default function UsersLoading() {
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
             <div className="space-y-6">
                 <PageHeader
-                    title="Rooms"
-                    description="Track protected rooms, locations, and room availability."
+                    title="Permissions"
+                    description="Control which users can enter which rooms and when."
                 />
 
                 <Card>
@@ -20,7 +20,7 @@ export default function UsersLoading() {
 
                     <CardContent className="space-y-4">
                         <InputGroup>
-                            <InputGroupInput placeholder="Search users" disabled />
+                            <InputGroupInput placeholder="Search user or room" disabled />
 
                             <InputGroupAddon>
                                 <Spinner />

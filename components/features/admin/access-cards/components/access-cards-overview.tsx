@@ -1,16 +1,23 @@
+import { Search } from "lucide-react";
+
 import { PageHeader } from "@/components/misc/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
+import type { AdminAccessCardsOverview } from "@/lib/server/admin-access-cards";
 
-export default function UsersLoading() {
+import { AccessCardsTable } from "./access-cards-table";
+
+interface AccessCardsOverviewProps {
+    data: AdminAccessCardsOverview;
+}
+
+export function AccessCardsOverview({ data }: AccessCardsOverviewProps) {
     return (
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
             <div className="space-y-6">
                 <PageHeader
-                    title="Rooms"
-                    description="Track protected rooms, locations, and room availability."
+                    title="Access Cards"
+                    description="Assign and monitor RFID cards used by SmartLock devices."
                 />
 
                 <Card>
@@ -20,14 +27,14 @@ export default function UsersLoading() {
 
                     <CardContent className="space-y-4">
                         <InputGroup>
-                            <InputGroupInput placeholder="Search users" disabled />
+                            <InputGroupInput placeholder="Search card code or owner" />
 
                             <InputGroupAddon>
-                                <Spinner />
+                                <Search />
                             </InputGroupAddon>
                         </InputGroup>
 
-                        <Skeleton className="h-80 w-full" />
+                        <AccessCardsTable accessCards={data.accessCards} />
                     </CardContent>
                 </Card>
             </div>

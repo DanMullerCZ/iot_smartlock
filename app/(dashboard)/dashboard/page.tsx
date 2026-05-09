@@ -1,4 +1,4 @@
-import { DashboardOverview } from "@/components/admin/DashboardOverview";
+import { DashboardOverview } from "@/components/features/admin/dashboard/components/dashboard-overview";
 import { getDashboardOverview } from "@/lib/server/admin-dashboard";
 
 export default async function DashboardPage() {

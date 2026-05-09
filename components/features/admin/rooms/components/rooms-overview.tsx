@@ -1,10 +1,17 @@
+import { Search } from "lucide-react";
+
 import { PageHeader } from "@/components/misc/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
+import type { AdminRoomsOverview } from "@/lib/server/admin-rooms";
 
-export default function UsersLoading() {
+import { RoomsTable } from "./rooms-table";
+
+interface RoomsOverviewProps {
+    data: AdminRoomsOverview;
+}
+
+export function RoomsOverview({ data }: RoomsOverviewProps) {
     return (
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
             <div className="space-y-6">
@@ -20,14 +27,14 @@ export default function UsersLoading() {
 
                     <CardContent className="space-y-4">
                         <InputGroup>
-                            <InputGroupInput placeholder="Search users" disabled />
+                            <InputGroupInput placeholder="Search rooms" />
 
                             <InputGroupAddon>
-                                <Spinner />
+                                <Search />
                             </InputGroupAddon>
                         </InputGroup>
 
-                        <Skeleton className="h-80 w-full" />
+                        <RoomsTable rooms={data.rooms} />
                     </CardContent>
                 </Card>
             </div>

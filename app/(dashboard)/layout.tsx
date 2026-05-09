@@ -1,16 +1,15 @@
 import { User } from "lucide-react";
 import { getServerSession } from "next-auth/next";
 
-import { StatusBadge, type StatusValue } from "@/components/admin/StatusBadge";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import LogoutButton from "@/components/misc/logout-button";
+import { StatusBadge, type StatusValue } from "@/components/misc/status-badge";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuGroup,
-    DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Kbd } from "@/components/ui/kbd";
@@ -37,7 +36,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                     <div className="flex items-center gap-3">
                         <StatusBadge value={signedUserRole} />
 
-                        <Separator orientation="vertical" />
+                        <Separator orientation="vertical" className="h-6" />
 
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -46,16 +45,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
                                     {signedUserName}
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent>
+
+                            <DropdownMenuContent align="end">
                                 <DropdownMenuGroup>
-                                    <DropdownMenuItem asChild>
-                                        <LogoutButton />
-                                    </DropdownMenuItem>
+                                    <LogoutButton />
                                 </DropdownMenuGroup>
                             </DropdownMenuContent>
                         </DropdownMenu>
 
-                        <Separator orientation="vertical" />
+                        <Separator orientation="vertical" className="h-6" />
 
                         <ThemeToggle />
                     </div>

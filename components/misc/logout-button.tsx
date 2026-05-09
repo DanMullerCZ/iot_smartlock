@@ -2,19 +2,16 @@
 
 import { signOut } from "next-auth/react";
 
-import { Button } from "@/components/ui/button";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 export default function LogoutButton() {
     return (
-        <Button
-            variant="destructive"
-            className="w-full"
-            size="sm"
-            onClick={() => {
+        <DropdownMenuItem
+            onSelect={() => {
                 void signOut({ callbackUrl: "/login" });
             }}
         >
             Sign out
-        </Button>
+        </DropdownMenuItem>
     );
 }

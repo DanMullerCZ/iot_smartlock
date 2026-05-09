@@ -3,9 +3,9 @@
 import { Activity } from "lucide-react";
 import { useMemo } from "react";
 
-import { DataTable } from "@/components/admin/DataTable";
-import { EmptyState } from "@/components/admin/EmptyState";
-import { StatusBadge } from "@/components/admin/StatusBadge";
+import { DataTable } from "@/components/admin/data-table";
+import { EmptyState } from "@/components/misc/empty-state";
+import { StatusBadge } from "@/components/misc/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { DashboardAccessRequest, DashboardPaginationMeta } from "@/lib/admin/dashboard-types";
 

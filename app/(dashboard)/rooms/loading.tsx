@@ -20,7 +20,7 @@ export default function UsersLoading() {
 
                     <CardContent className="space-y-4">
                         <InputGroup>
-                            <InputGroupInput placeholder="Search users" disabled />
+                            <InputGroupInput placeholder="Search rooms" disabled />
 
                             <InputGroupAddon>
                                 <Spinner />

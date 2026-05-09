@@ -1,16 +1,23 @@
+import { Search } from "lucide-react";
+
 import { PageHeader } from "@/components/misc/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
+import type { AdminPermissionsOverview } from "@/lib/server/admin-permissions";
 
-export default function UsersLoading() {
+import { PermissionsTable } from "./permissions-table";
+
+interface PermissionsOverviewProps {
+    data: AdminPermissionsOverview;
+}
+
+export function PermissionsOverview({ data }: PermissionsOverviewProps) {
     return (
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
             <div className="space-y-6">
                 <PageHeader
-                    title="Rooms"
-                    description="Track protected rooms, locations, and room availability."
+                    title="Permissions"
+                    description="Control which users can enter which rooms and when."
                 />
 
                 <Card>
@@ -20,14 +27,14 @@ export default function UsersLoading() {
 
                     <CardContent className="space-y-4">
                         <InputGroup>
-                            <InputGroupInput placeholder="Search users" disabled />
+                            <InputGroupInput placeholder="Search user or room" />
 
                             <InputGroupAddon>
-                                <Spinner />
+                                <Search />
                             </InputGroupAddon>
                         </InputGroup>
 
-                        <Skeleton className="h-80 w-full" />
+                        <PermissionsTable accessPermissions={data.accessPermissions} />
                     </CardContent>
                 </Card>
             </div>

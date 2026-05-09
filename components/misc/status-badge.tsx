@@ -40,11 +40,16 @@ function variantForStatus(value: StatusValue) {
         return "warning" as const;
     }
 
-    if (value === "DISABLED" || value === "DENIED" || value === "GENERIC_ERROR") {
+    if (
+        value === "DISABLED" ||
+        value === "DENIED" ||
+        value === "GENERIC_ERROR" ||
+        value === "SUPER_ADMIN"
+    ) {
         return "danger" as const;
     }
 
-    if (value === "SUPER_ADMIN" || value === "USER") {
+    if (value === "USER") {
         return "info" as const;
     }
 
@@ -52,9 +57,5 @@ function variantForStatus(value: StatusValue) {
 }
 
 export function StatusBadge({ value }: { value: StatusValue }) {
-    return (
-        <Badge className="w-full" variant={variantForStatus(value)}>
-            {labelForStatus(value)}
-        </Badge>
-    );
+    return <Badge variant={variantForStatus(value)}>{labelForStatus(value)}</Badge>;
 }

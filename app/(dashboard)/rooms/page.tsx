@@ -1,5 +1,8 @@
-import { ResourceManager } from "@/components/admin/ResourceManager";
+import { RoomsOverview } from "@/components/features/admin/rooms/components/rooms-overview";
+import { getRoomsOverview } from "@/lib/server/admin-rooms";
 
-export default function RoomsPage() {
-    return <ResourceManager resource="rooms" />;
+export default async function RoomsPage() {
+    const data = await getRoomsOverview();
+
+    return <RoomsOverview data={data} />;
 }
