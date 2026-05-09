@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import z from "zod";
 
+import { requireSuperAdminApi } from "@/lib/auth/authorization";
 import { prisma } from "@/lib/db";
 import { roomUpdateSchema } from "@/lib/validations/room";
 
@@ -8,7 +9,12 @@ interface Params {
     params: Promise<{ id: string }>;
 }
 
-export async function GET(_req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest, { params }: Params) {
+    const authResponse = await requireSuperAdminApi(req);
+    if (authResponse) {
+        return authResponse;
+    }
+
     const { id } = await params;
     const numId = parseInt(id, 10);
     if (isNaN(numId)) {
@@ -24,6 +30,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
 }
 
 export async function PATCH(req: NextRequest, { params }: Params) {
+    const authResponse = await requireSuperAdminApi(req);
+    if (authResponse) {
+        return authResponse;
+    }
+
     const { id } = await params;
     const numId = parseInt(id, 10);
     if (isNaN(numId)) {
@@ -56,7 +67,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
 }
 
-export async function DELETE(_req: NextRequest, { params }: Params) {
+export async function DELETE(req: NextRequest, { params }: Params) {
+    const authResponse = await requireSuperAdminApi(req);
+    if (authResponse) {
+        return authResponse;
+    }
+
     const { id } = await params;
     const numId = parseInt(id, 10);
     if (isNaN(numId)) {

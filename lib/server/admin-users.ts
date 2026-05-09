@@ -1,5 +1,7 @@
 import "server-only";
 
+import { hash } from "argon2";
+
 import { prisma } from "@/lib/db";
 
 export interface AdminUserRow {
@@ -60,15 +62,30 @@ export async function getUsersOverview(): Promise<AdminUsersOverview> {
 export async function createUser(input: {
     name: string;
     email: string;
+    password: string;
     role: "SUPER_ADMIN" | "ADMIN" | "USER";
     status: "ACTIVE" | "NOT_VERIFIED" | "DISABLED";
 }) {
+    const hashedPassword = await hash(input.password);
+
     return prisma.user.create({
         data: {
             name: input.name,
             email: input.email,
+            password: hashedPassword,
             role: input.role,
             status: input.status,
+        },
+        select: {
+            id: true,
+            uuid: true,
+            name: true,
+            email: true,
+            role: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+            deletedAt: true,
         },
     });
 }
@@ -95,21 +112,14 @@ export async function updateUser(
     });
 }
 
-export async function deleteUser(id: number, type: "soft" | "hard") {
-    if (type === "hard") return;
+export async function deleteUser(id: number) {
     return prisma.user.update({
         where: {
             id,
+            deletedAt: null,
         },
         data: {
-            deletedAt: new Date().toISOString(),
+            deletedAt: new Date(),
         },
     });
-
-    // HARD DELETE
-    // return prisma.user.delete({
-    //     where: {
-    //         id,
-    //     },
-    // });
 }

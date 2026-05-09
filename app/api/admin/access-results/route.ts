@@ -3,9 +3,15 @@ import type { NextRequest } from "next/server";
 
 import { jsonBigInt } from "@/lib/api/bigint";
 import { parsePagination, paginationMeta } from "@/lib/api/pagination";
+import { requireSuperAdminApi } from "@/lib/auth/authorization";
 import { prisma } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
+    const authResponse = await requireSuperAdminApi(req);
+    if (authResponse) {
+        return authResponse;
+    }
+
     const sp = req.nextUrl.searchParams;
     const { page, limit, skip } = parsePagination(sp);
 

@@ -64,6 +64,10 @@ interface UserFormInput {
     status: string;
 }
 
+interface CreateUserFormInput extends UserFormInput {
+    password: string;
+}
+
 function formatDate(value: string | null | undefined) {
     if (!value) {
         return "—";
@@ -81,12 +85,7 @@ export function UsersTable({ users }: UsersTableProps) {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [editingRow, setEditingRow] = useState<AdminUserRow | null>(null);
 
-    function handleCreateUser(newUser: {
-        name: string;
-        email: string;
-        role: string;
-        status: string;
-    }) {
+    function handleCreateUser(newUser: CreateUserFormInput) {
         startTransition(async () => {
             const response = await createUserAction(newUser);
 
@@ -125,6 +124,8 @@ export function UsersTable({ users }: UsersTableProps) {
             }
 
             toast.success(response.message);
+            setDeleteDialogOpen(false);
+            setEditingRow(null);
         });
     }
 
@@ -258,12 +259,14 @@ export function UsersTable({ users }: UsersTableProps) {
                             const formData = new FormData(event.currentTarget);
                             const rawName = formData.get("name");
                             const rawEmail = formData.get("email");
+                            const rawPassword = formData.get("password");
                             const rawRole = formData.get("role");
                             const rawStatus = formData.get("status");
 
                             handleCreateUser({
                                 name: typeof rawName === "string" ? rawName.trim() : "",
                                 email: typeof rawEmail === "string" ? rawEmail.trim() : "",
+                                password: typeof rawPassword === "string" ? rawPassword : "",
                                 role: typeof rawRole === "string" ? rawRole.trim() : "",
                                 status: typeof rawStatus === "string" ? rawStatus.trim() : "",
                             });
@@ -285,6 +288,19 @@ export function UsersTable({ users }: UsersTableProps) {
                             <Field>
                                 <FieldLabel htmlFor="create-email">Email</FieldLabel>
                                 <Input id="create-email" name="email" type="email" required />
+                            </Field>
+
+                            <Field>
+                                <FieldLabel htmlFor="create-password">Password</FieldLabel>
+                                <Input
+                                    id="create-password"
+                                    name="password"
+                                    type="password"
+                                    autoComplete="new-password"
+                                    minLength={8}
+                                    maxLength={64}
+                                    required
+                                />
                             </Field>
 
                             <Field>

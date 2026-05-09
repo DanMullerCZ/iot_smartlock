@@ -1,13 +1,19 @@
 import type { NextRequest } from "next/server";
 
 import { jsonBigInt } from "@/lib/api/bigint";
+import { requireSuperAdminApi } from "@/lib/auth/authorization";
 import { prisma } from "@/lib/db";
 
 interface Params {
     params: Promise<{ id: string }>;
 }
 
-export async function GET(_req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest, { params }: Params) {
+    const authResponse = await requireSuperAdminApi(req);
+    if (authResponse) {
+        return authResponse;
+    }
+
     const { id } = await params;
     let bigId: bigint;
     try {

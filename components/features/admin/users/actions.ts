@@ -3,14 +3,21 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { Prisma } from "@/generated/prisma/client";
+import { requireSuperAdminAction } from "@/lib/auth/authorization";
 import { createUser, updateUser, deleteUser } from "@/lib/server/admin-users";
 
 const userRoles = ["SUPER_ADMIN", "ADMIN", "USER"] as const;
 const userStatuses = ["NOT_VERIFIED", "ACTIVE", "DISABLED"] as const;
 
-const userSchema = z.object({
+interface UserActionResult {
+    success: boolean;
+    message: string;
+}
+
+const userBaseSchema = z.object({
     name: z.string().min(1, "Name is required"),
-    email: z.string().includes("@"),
+    email: z.email("Invalid email"),
     role: z.enum(userRoles, {
         message: "Invalid role",
     }),
@@ -18,8 +25,42 @@ const userSchema = z.object({
         message: "Invalid status",
     }),
 });
-export async function createUserAction(input: unknown) {
-    const parsed = userSchema.safeParse(input);
+
+const userCreateSchema = userBaseSchema.extend({
+    password: z.string().min(8, "Password must be at least 8 characters").max(64),
+});
+
+const userUpdateSchema = userBaseSchema;
+
+function mapPrismaError(error: unknown): UserActionResult | null {
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
+        return null;
+    }
+
+    if (error.code === "P2002") {
+        return {
+            success: false,
+            message: "Email already in use.",
+        };
+    }
+
+    if (error.code === "P2025") {
+        return {
+            success: false,
+            message: "User not found.",
+        };
+    }
+
+    return null;
+}
+
+export async function createUserAction(input: unknown): Promise<UserActionResult> {
+    const authFailure = await requireSuperAdminAction();
+    if (authFailure) {
+        return authFailure;
+    }
+
+    const parsed = userCreateSchema.safeParse(input);
 
     if (!parsed.success) {
         return {
@@ -28,7 +69,17 @@ export async function createUserAction(input: unknown) {
         };
     }
 
-    await createUser(parsed.data);
+    try {
+        await createUser(parsed.data);
+    } catch (error) {
+        const actionError = mapPrismaError(error);
+
+        if (actionError) {
+            return actionError;
+        }
+
+        throw error;
+    }
 
     revalidatePath("/users");
 
@@ -38,8 +89,13 @@ export async function createUserAction(input: unknown) {
     };
 }
 
-export async function updateUserAction(id: number, input: unknown) {
-    const parsed = userSchema.safeParse(input);
+export async function updateUserAction(id: number, input: unknown): Promise<UserActionResult> {
+    const authFailure = await requireSuperAdminAction();
+    if (authFailure) {
+        return authFailure;
+    }
+
+    const parsed = userUpdateSchema.safeParse(input);
 
     if (!parsed.success) {
         return {
@@ -48,7 +104,17 @@ export async function updateUserAction(id: number, input: unknown) {
         };
     }
 
-    await updateUser(id, parsed.data);
+    try {
+        await updateUser(id, parsed.data);
+    } catch (error) {
+        const actionError = mapPrismaError(error);
+
+        if (actionError) {
+            return actionError;
+        }
+
+        throw error;
+    }
 
     revalidatePath("/users");
 
@@ -58,8 +124,23 @@ export async function updateUserAction(id: number, input: unknown) {
     };
 }
 
-export async function deleteUserAction(id: number) {
-    await deleteUser(id, "soft");
+export async function deleteUserAction(id: number): Promise<UserActionResult> {
+    const authFailure = await requireSuperAdminAction();
+    if (authFailure) {
+        return authFailure;
+    }
+
+    try {
+        await deleteUser(id);
+    } catch (error) {
+        const actionError = mapPrismaError(error);
+
+        if (actionError) {
+            return actionError;
+        }
+
+        throw error;
+    }
 
     revalidatePath("/users");
 

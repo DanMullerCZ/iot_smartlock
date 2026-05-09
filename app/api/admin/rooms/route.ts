@@ -2,10 +2,16 @@ import type { NextRequest } from "next/server";
 import z from "zod";
 
 import { parsePagination, paginationMeta } from "@/lib/api/pagination";
+import { requireSuperAdminApi } from "@/lib/auth/authorization";
 import { prisma } from "@/lib/db";
 import { roomCreateSchema } from "@/lib/validations/room";
 
 export async function GET(req: NextRequest) {
+    const authResponse = await requireSuperAdminApi(req);
+    if (authResponse) {
+        return authResponse;
+    }
+
     const sp = req.nextUrl.searchParams;
     const { page, limit, skip } = parsePagination(sp);
 
@@ -31,6 +37,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+    const authResponse = await requireSuperAdminApi(req);
+    if (authResponse) {
+        return authResponse;
+    }
+
     let body: unknown;
     try {
         body = await req.json();
