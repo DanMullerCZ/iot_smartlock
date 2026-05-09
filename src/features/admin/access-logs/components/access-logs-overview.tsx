@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/misc/page-header";
+import { PageHeader } from "@/components/common/page-header";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import type { AdminAccessLogsOverview } from "@/lib/server/admin-access-logs";
 

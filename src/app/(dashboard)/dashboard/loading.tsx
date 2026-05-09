@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/misc/page-header";
+import { PageHeader } from "@/components/common/page-header";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 

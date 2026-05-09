@@ -3,9 +3,9 @@
 import { Activity } from "lucide-react";
 import { useMemo } from "react";
 
-import { DataTable } from "@/components/admin/data-table";
-import { EmptyState } from "@/components/misc/empty-state";
-import { StatusBadge } from "@/components/misc/status-badge";
+import { DataTable } from "@/components/common/data-table";
+import { EmptyState } from "@/components/common/empty-state";
+import { StatusBadge } from "@/components/common/status-badge";
 import type { AdminPermissionRow } from "@/lib/server/admin-permissions";
 
 interface PermissionsTableProps {

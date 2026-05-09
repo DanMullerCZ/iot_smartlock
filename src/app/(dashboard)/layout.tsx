@@ -2,9 +2,9 @@ import { User } from "lucide-react";
 import { getServerSession } from "next-auth/next";
 
 import { AppSidebar } from "@/components/layout/app-sidebar";
-import LogoutButton from "@/components/misc/logout-button";
-import { StatusBadge, type StatusValue } from "@/components/misc/status-badge";
-import { ThemeToggle } from "@/components/theme-toggle";
+import LogoutButton from "@/components/common/logout-button";
+import { StatusBadge, type StatusValue } from "@/components/common/status-badge";
+import { ThemeToggle } from "@/components/common/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,

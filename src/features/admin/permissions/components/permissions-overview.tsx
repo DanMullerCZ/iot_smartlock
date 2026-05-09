@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
 
-import { PageHeader } from "@/components/misc/page-header";
+import { PageHeader } from "@/components/common/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import type { AdminPermissionsOverview } from "@/lib/server/admin-permissions";

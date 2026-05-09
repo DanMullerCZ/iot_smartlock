@@ -4,9 +4,9 @@ import { Activity, Search, Settings2, Trash2 } from "lucide-react";
 import { startTransition, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { DataTable } from "@/components/admin/data-table";
-import { EmptyState } from "@/components/misc/empty-state";
-import { StatusBadge } from "@/components/misc/status-badge";
+import { DataTable } from "@/components/common/data-table";
+import { EmptyState } from "@/components/common/empty-state";
+import { StatusBadge } from "@/components/common/status-badge";
 import {
     AlertDialog,
     AlertDialogAction,

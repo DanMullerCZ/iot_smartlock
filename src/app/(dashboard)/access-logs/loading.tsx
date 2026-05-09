@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/misc/page-header";
+import { PageHeader } from "@/components/common/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";

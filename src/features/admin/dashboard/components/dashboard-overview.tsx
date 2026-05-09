@@ -1,6 +1,6 @@
 import { Activity, Building2, CreditCard, ShieldAlert, Users, type LucideIcon } from "lucide-react";
 
-import { PageHeader } from "@/components/misc/page-header";
+import { PageHeader } from "@/components/common/page-header";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RecentAccessActivityTable } from "@/features/admin/dashboard/components/recent-access-activity-table";
 import type { DashboardOverviewData, MetricIconKey } from "@/lib/admin/dashboard-types";
