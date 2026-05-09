@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { Prisma } from "@/generated/prisma/client";
+import { Prisma } from "@/base/generated/prisma/client";
 import { createUser } from "@/lib/api/users";
 import { registerSchema } from "@/lib/validations/user";
 

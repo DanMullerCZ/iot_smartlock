@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { Prisma } from "@/generated/prisma/client";
+import { Prisma } from "@/base/generated/prisma/client";
 import { requireSuperAdminAction } from "@/lib/auth/authorization";
 import { createUser, updateUser, deleteUser } from "@/lib/server/admin-users";
 

@@ -1,4 +1,4 @@
-import { RoomsOverview } from "@/components/features/admin/rooms/components/rooms-overview";
+import { RoomsOverview } from "@/features/admin/rooms/components/rooms-overview";
 import { getRoomsOverview } from "@/lib/server/admin-rooms";
 
 export default async function RoomsPage() {

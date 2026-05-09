@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
-import { UsersTable } from "@/components/features/admin/users/components/users-table";
 import { PageHeader } from "@/components/misc/page-header";
+import { UsersTable } from "@/features/admin/users/components/users-table";
 import type { AdminUsersOverview } from "@/lib/server/admin-users";
 
 interface UsersOverviewProps {
