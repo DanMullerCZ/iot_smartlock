@@ -5,58 +5,17 @@ import { useMemo } from "react";
 
 import { DataTable } from "@/components/common/data-table";
 import { EmptyState } from "@/components/common/empty-state";
-import { StatusBadge } from "@/components/common/status-badge";
-import type { AdminAccessLogsResultRow } from "@/lib/server/admin-access-logs";
+
+import type { AccessLogResultRow } from "../types";
+import { getAccessLogResultColumns } from "./access-logs-results-table-columns";
 
 interface AccessLogsResultsTableProps {
-    results: AdminAccessLogsResultRow[];
-}
-
-function formatDate(value: string | null | undefined) {
-    if (!value) {
-        return "—";
-    }
-
-    return new Intl.DateTimeFormat("en", {
-        dateStyle: "medium",
-        timeStyle: "short",
-    }).format(new Date(value));
+    results: AccessLogResultRow[];
 }
 
 export function AccessLogsResultsTable({ results }: AccessLogsResultsTableProps) {
     const columns = useMemo(() => {
-        return [
-            {
-                header: "Result",
-                cell: ({ row }: { row: { original: AdminAccessLogsResultRow } }) => {
-                    return <StatusBadge value={row.original.result} />;
-                },
-            },
-            {
-                header: "User",
-                cell: ({ row }: { row: { original: AdminAccessLogsResultRow } }) => {
-                    return `${row.original.accessRequest.user.name} · ${row.original.accessRequest.user.email}`;
-                },
-            },
-            {
-                header: "Room",
-                cell: ({ row }: { row: { original: AdminAccessLogsResultRow } }) => {
-                    return row.original.accessRequest.room.name;
-                },
-            },
-            {
-                header: "Card",
-                cell: ({ row }: { row: { original: AdminAccessLogsResultRow } }) => {
-                    return row.original.accessRequest.card.code;
-                },
-            },
-            {
-                header: "Completed",
-                cell: ({ row }: { row: { original: AdminAccessLogsResultRow } }) => {
-                    return formatDate(row.original.completedAt);
-                },
-            },
-        ];
+        return getAccessLogResultColumns();
     }, []);
 
     return (

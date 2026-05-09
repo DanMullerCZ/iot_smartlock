@@ -1,14 +1,14 @@
 import { PageHeader } from "@/components/common/page-header";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import type { AdminAccessLogsOverview } from "@/lib/server/admin-access-logs";
 
+import type { AccessLogsOverview } from "../types";
 import { AccessLogsTabContent } from "./access-logs-tab-content";
 
-interface AccessLogsProps {
-    data: AdminAccessLogsOverview;
+interface AccessLogsOverviewProps {
+    data: AccessLogsOverview;
 }
 
-export function AccessLogsOverview({ data }: AccessLogsProps) {
+export function AccessLogsOverview({ data }: AccessLogsOverviewProps) {
     return (
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
             <div className="space-y-6">
