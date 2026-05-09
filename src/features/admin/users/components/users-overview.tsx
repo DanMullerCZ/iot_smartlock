@@ -2,11 +2,12 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 
 import { PageHeader } from "@/components/common/page-header";
-import { UsersTable } from "@/features/admin/users/components/users-table";
-import type { AdminUsersOverview } from "@/lib/server/admin-users";
+
+import type { UsersOverview } from "../types";
+import { UsersTable } from "./users-table";
 
 interface UsersOverviewProps {
-    data: AdminUsersOverview;
+    data: UsersOverview;
 }
 
 export async function UsersOverview({ data }: UsersOverviewProps) {
