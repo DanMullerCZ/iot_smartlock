@@ -1,14 +1,10 @@
-import { Search } from "lucide-react";
-
 import { PageHeader } from "@/components/common/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import type { AdminPermissionsOverview } from "@/lib/server/admin-permissions";
 
+import type { PermissionsOverview } from "../types";
 import { PermissionsTable } from "./permissions-table";
 
 interface PermissionsOverviewProps {
-    data: AdminPermissionsOverview;
+    data: PermissionsOverview;
 }
 
 export function PermissionsOverview({ data }: PermissionsOverviewProps) {
@@ -20,23 +16,7 @@ export function PermissionsOverview({ data }: PermissionsOverviewProps) {
                     description="Control which users can enter which rooms and when."
                 />
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Directory</CardTitle>
-                    </CardHeader>
-
-                    <CardContent className="space-y-4">
-                        <InputGroup>
-                            <InputGroupInput placeholder="Search user or room" />
-
-                            <InputGroupAddon>
-                                <Search />
-                            </InputGroupAddon>
-                        </InputGroup>
-
-                        <PermissionsTable accessPermissions={data.accessPermissions} />
-                    </CardContent>
-                </Card>
+                <PermissionsTable accessPermissions={data.accessPermissions} />
             </div>
         </div>
     );
