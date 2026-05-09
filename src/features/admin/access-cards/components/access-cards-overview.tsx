@@ -1,14 +1,10 @@
-import { Search } from "lucide-react";
-
 import { PageHeader } from "@/components/common/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import type { AdminAccessCardsOverview } from "@/lib/server/admin-access-cards";
 
+import type { AccessCardsOverview } from "../types";
 import { AccessCardsTable } from "./access-cards-table";
 
 interface AccessCardsOverviewProps {
-    data: AdminAccessCardsOverview;
+    data: AccessCardsOverview;
 }
 
 export function AccessCardsOverview({ data }: AccessCardsOverviewProps) {
@@ -20,23 +16,7 @@ export function AccessCardsOverview({ data }: AccessCardsOverviewProps) {
                     description="Assign and monitor RFID cards used by SmartLock devices."
                 />
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Directory</CardTitle>
-                    </CardHeader>
-
-                    <CardContent className="space-y-4">
-                        <InputGroup>
-                            <InputGroupInput placeholder="Search card code or owner" />
-
-                            <InputGroupAddon>
-                                <Search />
-                            </InputGroupAddon>
-                        </InputGroup>
-
-                        <AccessCardsTable accessCards={data.accessCards} />
-                    </CardContent>
-                </Card>
+                <AccessCardsTable accessCards={data.accessCards} />
             </div>
         </div>
     );
