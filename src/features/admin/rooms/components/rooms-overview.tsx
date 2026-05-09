@@ -1,14 +1,10 @@
-import { Search } from "lucide-react";
-
 import { PageHeader } from "@/components/common/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import type { AdminRoomsOverview } from "@/lib/server/admin-rooms";
 
+import type { RoomsOverview } from "../types";
 import { RoomsTable } from "./rooms-table";
 
 interface RoomsOverviewProps {
-    data: AdminRoomsOverview;
+    data: RoomsOverview;
 }
 
 export function RoomsOverview({ data }: RoomsOverviewProps) {
@@ -20,23 +16,7 @@ export function RoomsOverview({ data }: RoomsOverviewProps) {
                     description="Track protected rooms, locations, and room availability."
                 />
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Directory</CardTitle>
-                    </CardHeader>
-
-                    <CardContent className="space-y-4">
-                        <InputGroup>
-                            <InputGroupInput placeholder="Search rooms" />
-
-                            <InputGroupAddon>
-                                <Search />
-                            </InputGroupAddon>
-                        </InputGroup>
-
-                        <RoomsTable rooms={data.rooms} />
-                    </CardContent>
-                </Card>
+                <RoomsTable rooms={data.rooms} />
             </div>
         </div>
     );
