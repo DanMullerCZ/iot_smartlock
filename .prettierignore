@@ -1,5 +1,6 @@
 .next/
 generated/
+src/generated/
 node_modules/
 *.lock
 prisma/migrations/

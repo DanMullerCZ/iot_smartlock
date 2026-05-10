@@ -63,5 +63,12 @@ export default defineConfig([
     // ── Prettier last — disables all ESLint formatting rules ─────────────────
     prettierConfig,
 
-    globalIgnores([".next/**", "out/**", "build/**", "generated/**", "next-env.d.ts"]),
+    globalIgnores([
+        ".next/**",
+        "out/**",
+        "build/**",
+        "generated/**",
+        "src/generated/**",
+        "next-env.d.ts",
+    ]),
 ]);
