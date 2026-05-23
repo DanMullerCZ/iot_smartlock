@@ -1,3 +1,5 @@
+import { timingSafeEqual } from "crypto";
+
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { getServerSession } from "next-auth/next";
@@ -10,7 +12,27 @@ export interface ActionAuthFailure {
     message: string;
 }
 
+function validateApiKey(req: NextRequest): boolean {
+    const key = req.headers.get("x-api-key");
+    if (!key) return false;
+
+    const keys = (env.IOT_API_KEYS ?? "")
+        .split(",")
+        .map((k) => {
+            return k.trim()
+        })
+        .filter(Boolean);
+
+    const keyBuf = Buffer.from(key);
+    return keys.some((k) => {
+        const kBuf = Buffer.from(k);
+        return kBuf.length === keyBuf.length && timingSafeEqual(kBuf, keyBuf);
+    });
+}
+
 export async function requireSuperAdminApi(req: NextRequest): Promise<Response | null> {
+    if (validateApiKey(req)) return null;
+
     const token = await getToken({ req, secret: env.NEXTAUTH_SECRET });
 
     if (!token) {

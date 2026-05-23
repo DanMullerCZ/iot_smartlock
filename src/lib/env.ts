@@ -9,6 +9,7 @@ export const env = createEnv({
         NEXTAUTH_URL: z.url(),
         GOOGLE_CLIENT_ID: z.string().optional(),
         GOOGLE_CLIENT_SECRET: z.string().optional(),
+        IOT_API_KEYS: z.string().optional(),
     },
     client: {},
     runtimeEnv: {
@@ -18,5 +19,6 @@ export const env = createEnv({
         NEXTAUTH_URL: process.env.NEXTAUTH_URL,
         GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
         GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+        IOT_API_KEYS: process.env.IOT_API_KEYS,
     },
 });
