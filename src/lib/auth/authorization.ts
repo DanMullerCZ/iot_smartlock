@@ -23,9 +23,6 @@ function validateApiKey(req: NextRequest): boolean {
         })
         .filter(Boolean);
 
-    console.log(`KeysLength: ${String(keys.length)} and incoming key '${key}'`);
-    console.log(String((env.IOT_API_KEYS ?? "").length))
-
     const keyBuf = Buffer.from(key);
     return keys.some((k) => {
         const kBuf = Buffer.from(k);

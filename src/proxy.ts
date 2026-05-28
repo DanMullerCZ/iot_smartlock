@@ -33,6 +33,11 @@ export async function proxy(req: NextRequest) {
         return NextResponse.next();
     }
 
+    // API key requests bypass session auth — the route handler validates the key
+    if (req.headers.get("x-api-key") && pathname.startsWith("/api/")) {
+        return NextResponse.next();
+    }
+
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
     if (!token) {
