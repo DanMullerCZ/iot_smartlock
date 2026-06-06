@@ -10,6 +10,7 @@ const ADMIN_PAGE_PREFIXES = [
     "/access-cards",
     "/permissions",
     "/access-logs",
+    "/lock",
 ];
 
 function matchesPathPrefix(pathname: string, prefixes: string[]) {

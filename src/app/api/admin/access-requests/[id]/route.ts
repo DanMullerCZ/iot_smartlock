@@ -28,6 +28,7 @@ export async function GET(req: NextRequest, { params }: Params) {
             user: { select: { id: true, name: true, email: true } },
             card: { select: { id: true, code: true, type: true } },
             room: { select: { id: true, name: true, location: true } },
+            lock: { select: { id: true, name: true, description: true } },
             accessResult: true,
         },
     });

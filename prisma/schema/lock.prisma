@@ -1,0 +1,19 @@
+model Lock {
+  // Identifiers
+  id                Int          @id @default(autoincrement())
+
+  // Additional information
+  name              String?      @db.VarChar(255)
+  description       String?
+
+  // Date columns
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  deletedAt         DateTime?
+
+  // Relations
+  roomId            Int          @unique // UQ enforces 1:1
+  room              Room         @relation(fields: [roomId], references: [id])
+
+  accessRequests    AccessRequest[]
+}

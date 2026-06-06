@@ -12,6 +12,7 @@ model Room {
   // Relations (only back-references = no DB columns)
   accessPermissions AccessPermission[]
   accessRequests    AccessRequest[]
+  lock              Lock[]
 
   // Date columns
   createdAt DateTime @default(now())

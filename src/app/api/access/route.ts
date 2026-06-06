@@ -10,7 +10,7 @@ export async function POST(req: Request) {
         return Response.json({ error: "Invalid JSON" }, { status: 400 });
     }
 
-    let parsedBody: { roomId: number; code: string };
+    let parsedBody: { lockId: number; roomId: number; code: string };
     try {
         parsedBody = parseAccessBody(body);
     } catch (error: unknown) {
@@ -82,6 +82,7 @@ export async function POST(req: Request) {
                         roomId: parsedBody.roomId,
                         userId: checkResult.userId,
                         cardId: checkResult.cardId,
+                        lockId: parsedBody.lockId,
                         requestedAt,
                     }
                 });
@@ -107,6 +108,7 @@ export async function POST(req: Request) {
                 roomId: parsedBody.roomId,
                 userId: checkResult.userId,
                 cardId: checkResult.cardId,
+                lockId: parsedBody.lockId,
                 requestedAt,
             }
         });
@@ -128,6 +130,7 @@ export async function POST(req: Request) {
 }
 
 function parseAccessBody(body: unknown): {
+    lockId: number;
     roomId: number;
     code: string;
 } {
@@ -137,6 +140,9 @@ function parseAccessBody(body: unknown): {
 
     const b = body as Record<string, unknown>;
 
+    if (typeof b.lockId !== "number" || !Number.isInteger(b.lockId)) {
+        throw new Error("Missing or invalid 'lockId': expected integer");
+    }
     if (typeof b.roomId !== "number" || !Number.isInteger(b.roomId)) {
         throw new Error("Missing or invalid 'roomId': expected integer");
     }
@@ -145,6 +151,7 @@ function parseAccessBody(body: unknown): {
     }
 
     return {
+        lockId: b.lockId,
         roomId: b.roomId,
         code: b.code,
     };

@@ -12,6 +12,9 @@ model AccessRequest {
   roomId Int
   room   Room       @relation(fields: [roomId], references: [id])
 
+  lockId Int
+  lock   Lock       @relation(fields: [lockId], references: [id])
+
   // Relations (only back-reference = no DB columns)
   accessResult AccessResult?
 

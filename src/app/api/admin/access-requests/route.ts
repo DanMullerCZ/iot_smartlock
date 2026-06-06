@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
     const userId = sp.get("userId") ? parseInt(sp.get("userId")!, 10) : undefined;
     const roomId = sp.get("roomId") ? parseInt(sp.get("roomId")!, 10) : undefined;
     const cardId = sp.get("cardId") ? parseInt(sp.get("cardId")!, 10) : undefined;
+    const lockId = sp.get("lockId") ? parseInt(sp.get("lockId")!, 10) : undefined;
     const from = sp.get("from") ? new Date(sp.get("from")!) : undefined;
     const to = sp.get("to") ? new Date(sp.get("to")!) : undefined;
 
@@ -25,6 +26,7 @@ export async function GET(req: NextRequest) {
         ...(userId !== undefined && !isNaN(userId) && { userId }),
         ...(roomId !== undefined && !isNaN(roomId) && { roomId }),
         ...(cardId !== undefined && !isNaN(cardId) && { cardId }),
+        ...(lockId !== undefined && !isNaN(lockId) && { lockId }),
         ...((from ?? to) && {
             requestedAt: {
                 ...(from && { gte: from }),
@@ -43,6 +45,7 @@ export async function GET(req: NextRequest) {
                 user: { select: { id: true, name: true, email: true } },
                 card: { select: { id: true, code: true, type: true } },
                 room: { select: { id: true, name: true, location: true } },
+                lock: { select: { id: true, name: true, description: true } },
                 accessResult: true,
             },
         }),
