@@ -35,6 +35,11 @@ export async function proxy(req: NextRequest) {
 
     // API key requests bypass session auth — the route handler validates the key
     if (req.headers.get("x-api-key") && pathname.startsWith("/api/")) {
+
+        if(!validateGateway(req)) {
+            return Response.json({ error: "Forbidden" }, { status: 403 });
+        }
+
         return NextResponse.next();
     }
 
@@ -66,3 +71,14 @@ export async function proxy(req: NextRequest) {
 export const config = {
     matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
+
+function validateGateway(req: NextRequest): boolean {
+    const { method, nextUrl } = req;
+    const { pathname } = nextUrl;
+
+    if(method.toLowerCase() === "post") {
+        return pathname.startsWith("/api/access-logs") || pathname.startsWith("/api/access");
+    } else {
+        return pathname.startsWith("/api") && method.toLowerCase() === "get";
+    }
+}
