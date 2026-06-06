@@ -19,7 +19,7 @@ function validateApiKey(req: NextRequest): boolean {
     const keys = (env.IOT_API_KEYS ?? "")
         .split(",")
         .map((k) => {
-            return k.trim()
+            return k.trim();
         })
         .filter(Boolean);
 

@@ -48,6 +48,22 @@ export function buildSchemas(z: typeof Zod, registry: OpenAPIRegistry) {
             status: z.enum(["ACTIVE", "BLOCKED", "DISABLED"]).optional(),
         }),
     );
+    const LockCreateRequestSchema = registry.register(
+        "LockCreateRequest",
+        z.object({
+            name: z.string().max(255).nullable().optional(),
+            description: z.string().nullable().optional(),
+            roomId: z.number().int().positive(),
+        }),
+    );
+    const LockUpdateRequestSchema = registry.register(
+        "LockUpdateRequest",
+        z.object({
+            name: z.string().max(255).nullable().optional(),
+            description: z.string().nullable().optional(),
+            roomId: z.number().int().positive().optional(),
+        }),
+    );
     const AccessCardCreateRequestSchema = registry.register(
         "AccessCardCreateRequest",
         z.object({
@@ -155,6 +171,36 @@ export function buildSchemas(z: typeof Zod, registry: OpenAPIRegistry) {
             .openapi("RoomListResponse"),
     );
 
+    const RoomRefSchema = z.object({
+        id: z.number().int(),
+        name: z.string(),
+        location: z.string().nullable(),
+    });
+
+    // ─── Lock ──────────────────────────────────────────────────────────────────
+    const LockSchema = registry.register(
+        "Lock",
+        z
+            .object({
+                id: z.number().int(),
+                name: z.string().nullable(),
+                description: z.string().nullable(),
+                roomId: z.number().int(),
+                room: RoomRefSchema,
+                createdAt: z.iso.datetime(),
+                updatedAt: z.iso.datetime(),
+                deletedAt: DateTimeNullable,
+            })
+            .openapi("Lock"),
+    );
+
+    const LockListResponseSchema = registry.register(
+        "LockListResponse",
+        z
+            .object({ data: z.array(LockSchema), meta: PaginationMetaSchema })
+            .openapi("LockListResponse"),
+    );
+
     // ─── Access Card ───────────────────────────────────────────────────────────
     const UserRefSchema = z.object({ id: z.number().int(), name: z.string(), email: z.string() });
 
@@ -185,12 +231,6 @@ export function buildSchemas(z: typeof Zod, registry: OpenAPIRegistry) {
     );
 
     // ─── Access Permission ─────────────────────────────────────────────────────
-    const RoomRefSchema = z.object({
-        id: z.number().int(),
-        name: z.string(),
-        location: z.string().nullable(),
-    });
-
     const AccessPermissionSchema = registry.register(
         "AccessPermission",
         z
@@ -294,6 +334,8 @@ export function buildSchemas(z: typeof Zod, registry: OpenAPIRegistry) {
         AdminUserUpdateRequestSchema,
         RoomCreateRequestSchema,
         RoomUpdateRequestSchema,
+        LockCreateRequestSchema,
+        LockUpdateRequestSchema,
         AccessCardCreateRequestSchema,
         AccessCardUpdateRequestSchema,
         AccessPermissionCreateRequestSchema,
@@ -303,6 +345,8 @@ export function buildSchemas(z: typeof Zod, registry: OpenAPIRegistry) {
         UserListResponseSchema,
         RoomSchema,
         RoomListResponseSchema,
+        LockSchema,
+        LockListResponseSchema,
         AccessCardSchema,
         AccessCardListResponseSchema,
         AccessPermissionSchema,

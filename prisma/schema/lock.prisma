@@ -12,8 +12,10 @@ model Lock {
   deletedAt         DateTime?
 
   // Relations
-  roomId            Int          @unique // UQ enforces 1:1
+  roomId            Int
   room              Room         @relation(fields: [roomId], references: [id])
 
   accessRequests    AccessRequest[]
+
+  @@index([roomId])
 }

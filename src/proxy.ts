@@ -7,10 +7,10 @@ const ADMIN_PAGE_PREFIXES = [
     "/dashboard",
     "/users",
     "/rooms",
+    "/locks",
     "/access-cards",
     "/permissions",
     "/access-logs",
-    "/lock",
 ];
 
 function matchesPathPrefix(pathname: string, prefixes: string[]) {
@@ -36,8 +36,7 @@ export async function proxy(req: NextRequest) {
 
     // API key requests bypass session auth — the route handler validates the key
     if (req.headers.get("x-api-key") && pathname.startsWith("/api/")) {
-
-        if(!validateGateway(req)) {
+        if (!validateGateway(req)) {
             return Response.json({ error: "Forbidden" }, { status: 403 });
         }
 
@@ -77,7 +76,7 @@ function validateGateway(req: NextRequest): boolean {
     const { method, nextUrl } = req;
     const { pathname } = nextUrl;
 
-    if(method.toLowerCase() === "post") {
+    if (method.toLowerCase() === "post") {
         return pathname.startsWith("/api/access-logs") || pathname.startsWith("/api/access");
     } else {
         return pathname.startsWith("/api") && method.toLowerCase() === "get";

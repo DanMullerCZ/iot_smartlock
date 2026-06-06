@@ -1,7 +1,11 @@
 import type { NextRequest } from "next/server";
+import z from "zod";
 
+import { mapLockRouteError } from "@/features/admin/locks/errors";
+import { softDeleteLock, updateLock } from "@/features/admin/locks/mutations";
+import { getLockById } from "@/features/admin/locks/queries";
 import { requireSuperAdminApi } from "@/lib/auth/authorization";
-import { prisma } from "@/lib/db";
+import { lockUpdateSchema } from "@/lib/validations/lock";
 
 interface Params {
     params: Promise<{ id: string }>;
@@ -24,13 +28,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         return Response.json({ error: "Invalid id" }, { status: 400 });
     }
 
-    const lock = await prisma.lock.findUnique({
-        where: { id: lockId },
-        include: {
-            room: { select: { id: true, name: true, location: true } },
-        },
-    });
-
+    const lock = await getLockById(lockId);
     if (!lock) {
         return Response.json({ error: "Not found" }, { status: 404 });
     }
@@ -38,7 +36,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     return Response.json({ data: lock });
 }
 
-export async function PUT(req: NextRequest, { params }: Params) {
+export async function PATCH(req: NextRequest, { params }: Params) {
     const authResponse = await requireSuperAdminApi(req);
     if (authResponse) {
         return authResponse;
@@ -50,40 +48,27 @@ export async function PUT(req: NextRequest, { params }: Params) {
         return Response.json({ error: "Invalid id" }, { status: 400 });
     }
 
-    let body: { name?: string; description?: string; roomId?: number };
+    let body: unknown;
     try {
         body = await req.json();
     } catch {
         return Response.json({ error: "Invalid JSON" }, { status: 400 });
     }
 
-    const { name, description, roomId } = body;
+    const parsed = lockUpdateSchema.safeParse(body);
+    if (!parsed.success) {
+        return Response.json({ error: z.treeifyError(parsed.error) }, { status: 422 });
+    }
 
     try {
-        const lock = await prisma.lock.update({
-            where: { id: lockId },
-            data: {
-                ...(name !== undefined && { name }),
-                ...(description !== undefined && { description }),
-                ...(roomId !== undefined && { roomId: Number(roomId) }),
-            },
-            include: {
-                room: { select: { id: true, name: true, location: true } },
-            },
-        });
-
+        const lock = await updateLock(lockId, parsed.data);
         return Response.json({ data: lock });
     } catch (err: unknown) {
-        const code = (err as { code?: string }).code;
-        if (code === "P2025") {
-            return Response.json({ error: "Not found" }, { status: 404 });
+        const mapped = mapLockRouteError(err);
+        if (mapped) {
+            return mapped;
         }
-        if (code === "P2002") {
-            return Response.json({ error: "A lock for this room already exists" }, { status: 409 });
-        }
-        if (code === "P2003") {
-            return Response.json({ error: "Room not found" }, { status: 404 });
-        }
+
         throw err;
     }
 }
@@ -101,17 +86,14 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     }
 
     try {
-        await prisma.lock.update({
-            where: { id: lockId, deletedAt: null },
-            data: { deletedAt: new Date() },
-        });
-
+        await softDeleteLock(lockId);
         return new Response(null, { status: 204 });
     } catch (err: unknown) {
-        const code = (err as { code?: string }).code;
-        if (code === "P2025") {
-            return Response.json({ error: "Not found" }, { status: 404 });
+        const mapped = mapLockRouteError(err);
+        if (mapped) {
+            return mapped;
         }
+
         throw err;
     }
 }

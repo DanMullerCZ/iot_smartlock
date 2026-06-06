@@ -342,6 +342,110 @@ export function getOpenApiSpec(): OpenApiDocument {
         },
     });
 
+    // ─── Admin / Locks ─────────────────────────────────────────────────────────
+    registry.registerPath({
+        method: "get",
+        path: "/api/admin/locks",
+        tags: ["Admin / Locks"],
+        summary: "List locks (paginated)",
+        security: bearerAuth,
+        request: {
+            query: p.paginationQuery.extend(p.softDeleteQuery.shape).extend(
+                z.object({
+                    roomId: z.coerce
+                        .number()
+                        .int()
+                        .positive()
+                        .optional()
+                        .openapi({ description: "Filter by room ID" }),
+                }).shape,
+            ),
+        },
+        responses: {
+            200: {
+                description: "Paginated lock list",
+                content: { "application/json": { schema: s.LockListResponseSchema } },
+            },
+            ...errorResponses,
+        },
+    });
+
+    registry.registerPath({
+        method: "post",
+        path: "/api/admin/locks",
+        tags: ["Admin / Locks"],
+        summary: "Create lock",
+        security: bearerAuth,
+        request: {
+            body: {
+                required: true,
+                content: { "application/json": { schema: s.LockCreateRequestSchema } },
+            },
+        },
+        responses: {
+            201: {
+                description: "Lock created",
+                content: { "application/json": { schema: z.object({ data: s.LockSchema }) } },
+            },
+            404: { description: "Room not found" },
+            ...errorResponses,
+        },
+    });
+
+    registry.registerPath({
+        method: "get",
+        path: "/api/admin/locks/{id}",
+        tags: ["Admin / Locks"],
+        summary: "Get lock by ID",
+        security: bearerAuth,
+        request: { params: p.intPathParams },
+        responses: {
+            200: {
+                description: "Lock",
+                content: { "application/json": { schema: z.object({ data: s.LockSchema }) } },
+            },
+            404: { description: "Not found" },
+            ...errorResponses,
+        },
+    });
+
+    registry.registerPath({
+        method: "patch",
+        path: "/api/admin/locks/{id}",
+        tags: ["Admin / Locks"],
+        summary: "Update lock",
+        security: bearerAuth,
+        request: {
+            params: p.intPathParams,
+            body: {
+                required: true,
+                content: { "application/json": { schema: s.LockUpdateRequestSchema } },
+            },
+        },
+        responses: {
+            200: {
+                description: "Updated lock",
+                content: { "application/json": { schema: z.object({ data: s.LockSchema }) } },
+            },
+            404: { description: "Not found" },
+            ...errorResponses,
+        },
+    });
+
+    registry.registerPath({
+        method: "delete",
+        path: "/api/admin/locks/{id}",
+        tags: ["Admin / Locks"],
+        summary: "Soft-delete lock",
+        security: bearerAuth,
+        request: { params: p.intPathParams },
+        responses: {
+            204: { description: "Deleted" },
+            404: { description: "Not found" },
+            ...errorResponses,
+        },
+    });
+
     // ─── Admin / Access Cards ──────────────────────────────────────────────────
     registry.registerPath({
         method: "get",

@@ -4,6 +4,7 @@ import {
     BookOpen,
     Users,
     CreditCard,
+    KeyRound,
     PieChart,
     Building2,
     ShieldAlert,
@@ -46,6 +47,11 @@ const data = {
             title: "Rooms",
             url: "/rooms",
             icon: Building2,
+        },
+        {
+            title: "Locks",
+            url: "/locks",
+            icon: KeyRound,
         },
         {
             title: "Access Cards",

@@ -16,60 +16,102 @@ export async function POST(req: Request) {
     } catch (error: unknown) {
         return Response.json(
             { error: error instanceof Error ? error.message : "Invalid Input" },
-            { status: 422 }
+            { status: 422 },
         );
     }
 
     type CheckResult =
-        | { granted: true;  userId: number; cardId: number }
+        | { granted: true; userId: number; cardId: number }
         | { granted: false; userId?: number; cardId?: number; status: number; error: string };
 
     let checkResult: CheckResult | undefined;
     try {
         checkResult = await prisma.$transaction(async (tx) => {
             const room = await tx.room.findUnique({
-                where: { id: parsedBody.roomId, status: "ACTIVE" }
+                where: { id: parsedBody.roomId, status: "ACTIVE" },
             });
             if (!room) {
-                return { granted: false, status: 404, error: `Room (${parsedBody.roomId.toString()}) not found` } as const;
+                return {
+                    granted: false,
+                    status: 404,
+                    error: `Room (${parsedBody.roomId.toString()}) not found`,
+                } as const;
             }
 
             const card = await tx.accessCard.findUnique({
-                where: { code: parsedBody.code, status: "ACTIVE", type: "RFID" }
+                where: { code: parsedBody.code, status: "ACTIVE", type: "RFID" },
             });
             if (!card) {
                 return { granted: false, status: 404, error: "No active card found" } as const;
             }
             if (card.userId === null) {
-                return { granted: false, cardId: card.id, status: 400, error: "Card is not assigned to anyone" } as const;
+                return {
+                    granted: false,
+                    cardId: card.id,
+                    status: 400,
+                    error: "Card is not assigned to anyone",
+                } as const;
             }
 
             const user = await tx.user.findUnique({ where: { id: card.userId } });
             if (!user) {
-                return { granted: false, cardId: card.id, status: 404, error: "No user assigned to card" } as const;
+                return {
+                    granted: false,
+                    cardId: card.id,
+                    status: 404,
+                    error: "No user assigned to card",
+                } as const;
             }
             if (user.status !== "ACTIVE") {
-                return { granted: false, userId: user.id, cardId: card.id, status: 403, error: "User is not active" } as const;
+                return {
+                    granted: false,
+                    userId: user.id,
+                    cardId: card.id,
+                    status: 403,
+                    error: "User is not active",
+                } as const;
             }
 
             const accessPermissions = await tx.accessPermission.findMany({
-                where: { roomId: parsedBody.roomId, userId: user.id }
+                where: { roomId: parsedBody.roomId, userId: user.id },
             });
             if (accessPermissions.length === 0) {
-                return { granted: false, userId: user.id, cardId: card.id, status: 403, error: "User is not permitted to access" } as const;
+                return {
+                    granted: false,
+                    userId: user.id,
+                    cardId: card.id,
+                    status: 403,
+                    error: "User is not permitted to access",
+                } as const;
             }
 
-            const activePermissions = accessPermissions.filter(ap => {return ap.status === "ACTIVE"});
+            const activePermissions = accessPermissions.filter((ap) => {
+                return ap.status === "ACTIVE";
+            });
             if (activePermissions.length === 0) {
-                return { granted: false, userId: user.id, cardId: card.id, status: 403, error: "User has no active permissions" } as const;
+                return {
+                    granted: false,
+                    userId: user.id,
+                    cardId: card.id,
+                    status: 403,
+                    error: "User has no active permissions",
+                } as const;
             }
 
-            const validPermission = activePermissions.find(ap =>
-                {return (ap.from === null || requestedAt >= ap.from) &&
-                (ap.to === null || requestedAt <= ap.to)}
-            );
+            const validPermission = activePermissions.find((ap) => {
+                return (
+                    (ap.from === null || requestedAt >= ap.from) &&
+                    (ap.to === null || requestedAt <= ap.to)
+                );
+            });
             if (!validPermission) {
-                return { granted: false, userId: user.id, cardId: card.id, status: 403, error: "No valid permission for current time" } as const;
+                return {
+                    granted: false,
+                    userId: user.id,
+                    cardId: card.id,
+                    status: 403,
+                    error: "No valid permission for current time",
+                } as const;
             }
 
             return { granted: true, userId: user.id, cardId: card.id } as const;
@@ -84,7 +126,7 @@ export async function POST(req: Request) {
                         cardId: checkResult.cardId,
                         lockId: parsedBody.lockId,
                         requestedAt,
-                    }
+                    },
                 });
 
                 await prisma.accessResult.create({
@@ -92,10 +134,10 @@ export async function POST(req: Request) {
                         accessRequestId: accessRequestLog.id,
                         completedAt: new Date(),
                         result: "GENERIC_ERROR",
-                    }
+                    },
                 });
             }
-        } catch {  }
+        } catch {}
 
         return Response.json({ error: "Internal server error" }, { status: 500 });
     }
@@ -110,7 +152,7 @@ export async function POST(req: Request) {
                 cardId: checkResult.cardId,
                 lockId: parsedBody.lockId,
                 requestedAt,
-            }
+            },
         });
 
         await prisma.accessResult.create({
@@ -118,7 +160,7 @@ export async function POST(req: Request) {
                 accessRequestId: accessRequestLog.id,
                 completedAt: new Date(),
                 result: checkResult.granted ? "OK" : "DENIED",
-            }
+            },
         });
     }
 

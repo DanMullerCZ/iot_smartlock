@@ -43,7 +43,7 @@ export function DataTable<TData>({
 
     const page = meta?.page ?? 1;
     const totalPages = meta?.totalPages ?? 1;
-    const total = meta?.total ?? 0;
+    const total = meta?.total ?? data.length;
 
     return (
         <div className="space-y-3">
